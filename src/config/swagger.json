@@ -1,0 +1,370 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Gestão de Eventos Acadêmicos - Sistema RBAC",
+    "version": "1.0.0",
+    "description": "API REST completa com Controle de Acesso Baseado em Papéis (RBAC - ADMIN, EDITOR, USER), desenvolvida em Node.js, Express e PostgreSQL (Supabase)."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Ambiente Local de Desenvolvimento"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Insira o token JWT retornado no endpoint /users/login para acessar rotas protegidas."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Lucas Silva" },
+          "email": { "type": "string", "format": "email", "example": "lucas@email.com" },
+          "role": { "type": "string", "enum": ["ADMIN", "EDITOR", "USER"], "example": "USER" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "Semana Acadêmica de Tecnologia" },
+          "description": { "type": "string", "example": "Palestras e workshops sobre IA e Engenharia de Software." },
+          "event_date": { "type": "string", "format": "date-time", "example": "2026-11-20T09:00:00Z" },
+          "location": { "type": "string", "example": "Auditório Central" },
+          "capacity": { "type": "integer", "example": 150 },
+          "created_by": { "type": "integer", "example": 1 },
+          "total_subscriptions": { "type": "integer", "example": 25 },
+          "available_slots": { "type": "integer", "example": 125 }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "subscription_id": { "type": "integer", "example": 1 },
+          "user_id": { "type": "integer", "example": 2 },
+          "user_name": { "type": "string", "example": "Ana Maria" },
+          "event_id": { "type": "integer", "example": 1 },
+          "event_title": { "type": "string", "example": "Semana Acadêmica de Tecnologia" },
+          "certificate_code": { "type": "string", "example": "CERT-1-1-A9F3C1" }
+        }
+      },
+      "Certificate": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "code": { "type": "string", "example": "CERT-1-1-A9F3C1" },
+          "issued_at": { "type": "string", "format": "date-time" },
+          "declaration": { "type": "string", "example": "Certificamos que Ana Maria participou do evento..." }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/users/register": {
+      "post": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Cadastrar novo participante/usuário",
+        "description": "Acesso: PÚBLICO | USER | EDITOR | ADMIN. Cria uma nova conta. Papel padrão: USER.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string", "example": "Ana Maria" },
+                  "email": { "type": "string", "example": "ana@email.com" },
+                  "password": { "type": "string", "example": "senhaSegura123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário criado com sucesso" },
+          "400": { "description": "Dados inválidos" },
+          "409": { "description": "Email já em uso" }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Autenticar usuário e obter token JWT",
+        "description": "Acesso: PÚBLICO. Retorna token JWT com id e role para ser usado nas rotas protegidas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "admin@eventos.edu.br" },
+                  "password": { "type": "string", "example": "Admin@123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Autenticado com sucesso" },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Listar todos os usuários",
+        "description": "Acesso: ADMIN e EDITOR. Usuários comuns (USER) recebem 403.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "role", "in": "query", "schema": { "type": "string", "enum": ["ADMIN", "EDITOR", "USER"] } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista paginada de usuários" },
+          "401": { "description": "Token não fornecido ou inválido" },
+          "403": { "description": "Acesso negado - Requer ADMIN ou EDITOR" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Consultar usuário por ID",
+        "description": "Acesso: ADMIN, EDITOR ou o próprio USER.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Dados do usuário" },
+          "403": { "description": "Permissão negada" },
+          "404": { "description": "Usuário não encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Editar usuário",
+        "description": "Acesso RBAC: ADMIN (qualquer usuário), EDITOR (apenas perfil USER), USER (apenas o próprio perfil).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string", "enum": ["ADMIN", "EDITOR", "USER"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Usuário atualizado" },
+          "403": { "description": "Permissão negada por regra RBAC" }
+        }
+      },
+      "delete": {
+        "tags": ["Usuários & Autenticação"],
+        "summary": "Excluir usuário",
+        "description": "Acesso: Apenas ADMIN. EDITORS e USERS recebem 403.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Usuário excluído" },
+          "403": { "description": "Permissão negada - Exige perfil ADMIN" }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": ["Eventos Acadêmicos"],
+        "summary": "Listar e buscar eventos",
+        "description": "Acesso: PÚBLICO | USER | EDITOR | ADMIN. Retorna eventos com filtros e vagas restantes.",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "location", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de eventos" }
+        }
+      },
+      "post": {
+        "tags": ["Eventos Acadêmicos"],
+        "summary": "Criar novo evento",
+        "description": "Acesso: ADMIN e EDITOR. USERS comuns recebem 403.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "event_date"],
+                "properties": {
+                  "title": { "type": "string", "example": "Congresso de Inteligência Artificial" },
+                  "description": { "type": "string", "example": "Palestrantes internacionais e minicursos práticos." },
+                  "event_date": { "type": "string", "example": "2026-11-25T14:00:00Z" },
+                  "location": { "type": "string", "example": "Campus Central - Auditório 1" },
+                  "capacity": { "type": "integer", "example": 200 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Evento criado com sucesso" },
+          "403": { "description": "Permissão negada - Exige ADMIN ou EDITOR" }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "tags": ["Eventos Acadêmicos"],
+        "summary": "Buscar detalhes de um evento",
+        "description": "Acesso: PÚBLICO.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Detalhes do evento" },
+          "404": { "description": "Evento não encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Eventos Acadêmicos"],
+        "summary": "Editar evento",
+        "description": "Acesso: ADMIN e EDITOR. USERS recebem 403.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "event_date": { "type": "string" },
+                  "location": { "type": "string" },
+                  "capacity": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Evento atualizado" },
+          "403": { "description": "Permissão negada" }
+        }
+      },
+      "delete": {
+        "tags": ["Eventos Acadêmicos"],
+        "summary": "Deletar evento",
+        "description": "Acesso: EXCLUSIVO ADMIN. EDITORS e USERS recebem 403.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Evento excluído" },
+          "403": { "description": "Permissão negada - Exige ADMIN" }
+        }
+      }
+    },
+    "/subscriptions": {
+      "get": {
+        "tags": ["Inscrições"],
+        "summary": "Consultar inscrições",
+        "description": "Acesso RBAC: ADMIN e EDITOR veem todas; USER vê apenas as suas.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "event_id", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de inscrições filtrada pelo papel do usuário" }
+        }
+      },
+      "post": {
+        "tags": ["Inscrições"],
+        "summary": "Inscrever-se em evento",
+        "description": "Acesso: ADMIN, EDITOR, USER. Valida capacidade máxima e duplicidade.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["event_id"],
+                "properties": {
+                  "event_id": { "type": "integer", "example": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Inscrição realizada e certificado gerado" },
+          "400": { "description": "Capacidade esgotada" },
+          "409": { "description": "Já inscrito" }
+        }
+      }
+    },
+    "/subscriptions/{id}": {
+      "delete": {
+        "tags": ["Inscrições"],
+        "summary": "Cancelar inscrição",
+        "description": "Acesso: ADMIN ou o próprio USER inscrito.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Inscrição cancelada com sucesso" },
+          "403": { "description": "Permissão negada" }
+        }
+      }
+    },
+    "/certificates/{id}": {
+      "get": {
+        "tags": ["Certificados"],
+        "summary": "Emitir / Baixar certificado",
+        "description": "Acesso RBAC: ADMIN e EDITOR (qualquer certificado), USER (apenas das suas próprias inscrições).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Dados completos do certificado acadêmico emitido" },
+          "403": { "description": "Permissão negada - USER tentando acessar certificado alheio" },
+          "404": { "description": "Certificado não encontrado" }
+        }
+      }
+    },
+    "/certificates/validate/{code}": {
+      "get": {
+        "tags": ["Certificados"],
+        "summary": "Validar autenticidade de certificado",
+        "description": "Acesso: PÚBLICO. Permite a validação externa do certificado pelo código alfanumérico.",
+        "parameters": [{ "name": "code", "in": "path", "required": true, "schema": { "type": "string", "example": "CERT-1-1-A9F3C1" } }],
+        "responses": {
+          "200": { "description": "Certificado válido" },
+          "404": { "description": "Certificado não encontrado" }
+        }
+      }
+    }
+  }
+}

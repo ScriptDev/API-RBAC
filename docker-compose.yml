@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: rbac_events_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:root@db_local:5432/eventos_db}
+      - JWT_SECRET=${JWT_SECRET:-chave_secreta_jwt_padrao}
+
+  # Serviço opcional de banco de dados local para execução offline
+  db_local:
+    image: postgres:15-alpine
+    container_name: rbac_postgres_local
+    restart: unless-stopped
+    profiles:
+      - offline
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: eventos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./script.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:

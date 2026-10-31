@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "API Gestão de Eventos Acadêmicos - RBAC",
+    "description": "Coleção completa de testes da API REST com controle de acesso RBAC (ADMIN, EDITOR, USER).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token_admin", "value": "", "type": "string" },
+    { "key": "token_editor", "value": "", "type": "string" },
+    { "key": "token_user", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticação & Usuários",
+      "item": [
+        {
+          "name": "POST Registrar Usuário (Público)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Carlos Aluno\",\n  \"email\": \"carlos@email.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/register", "host": ["{{baseUrl}}"], "path": ["users", "register"] }
+          }
+        },
+        {
+          "name": "POST Login ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('token_admin', res.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@eventos.edu.br\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] }
+          }
+        },
+        {
+          "name": "GET Listar Usuários (Requer ADMIN/EDITOR)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "PUT Editar Usuário (RBAC Regras)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Carlos Aluno Silva Atualizado\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] }
+          }
+        },
+        {
+          "name": "DELETE Deletar Usuário (Apenas ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Eventos Acadêmicos",
+      "item": [
+        {
+          "name": "GET Listar Eventos (Público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          }
+        },
+        {
+          "name": "POST Criar Evento (ADMIN / EDITOR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Congresso de Inteligência Artificial e DevSecOps\",\n  \"description\": \"Imersão profunda em LLMs, Engenharia de Software e Cloud.\",\n  \"event_date\": \"2026-11-20T10:00:00Z\",\n  \"location\": \"Auditório Master\",\n  \"capacity\": 100\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          }
+        },
+        {
+          "name": "GET Buscar Evento por ID (Público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] }
+          }
+        },
+        {
+          "name": "PUT Editar Evento (ADMIN / EDITOR)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Congresso de Inteligência Artificial e DevSecOps 2026 (Atualizado)\",\n  \"capacity\": 150\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] }
+          }
+        },
+        {
+          "name": "DELETE Deletar Evento (Apenas ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Inscrições em Eventos",
+      "item": [
+        {
+          "name": "POST Inscrever-se no Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/subscriptions", "host": ["{{baseUrl}}"], "path": ["subscriptions"] }
+          }
+        },
+        {
+          "name": "GET Listar Inscrições (RBAC Segregado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }],
+            "url": { "raw": "{{baseUrl}}/subscriptions", "host": ["{{baseUrl}}"], "path": ["subscriptions"] }
+          }
+        },
+        {
+          "name": "DELETE Cancelar Inscrição",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }],
+            "url": { "raw": "{{baseUrl}}/subscriptions/1", "host": ["{{baseUrl}}"], "path": ["subscriptions", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Certificados Acadêmicos",
+      "item": [
+        {
+          "name": "GET Emitir ou Baixar Certificado",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }],
+            "url": { "raw": "{{baseUrl}}/certificates/1", "host": ["{{baseUrl}}"], "path": ["certificates", "1"] }
+          }
+        },
+        {
+          "name": "GET Validar Certificado por Código (Público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/certificates/validate/CERT-1-1-A9F3C1", "host": ["{{baseUrl}}"], "path": ["certificates", "validate", "CERT-1-1-A9F3C1"] }
+          }
+        }
+      ]
+    }
+  ]
+}

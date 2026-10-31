@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Eventos Acadêmicos | Sistema RBAC</title>
+    <!-- Tailwind CSS para design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .certificate-font { font-family: 'Cinzel', serif; }
+        @media print {
+            body * { visibility: hidden; }
+            #printable-certificate, #printable-certificate * { visibility: visible; }
+            #printable-certificate { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- BARRA SUPERIOR -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-bold text-xl text-white shadow-md">
+                    🎓
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-tight text-white">Eventos Acadêmicos</h1>
+                    <p class="text-xs text-slate-400">Portal Integrado de Gestão e Certificação</p>
+                </div>
+            </div>
+
+            <!-- CONTROLE DE AUTENTICAÇÃO E PERFIL ATIVO -->
+            <div class="flex items-center flex-wrap gap-2 text-xs">
+                <div id="auth-status-badge" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500" id="role-dot"></span>
+                    <span id="role-text" class="font-semibold text-slate-300">PÚBLICO</span>
+                </div>
+
+                <!-- CONTAS DE TESTE / ACESSO RÁPIDO -->
+                <div class="flex items-center bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 gap-1">
+                    <button onclick="quickLogin('ADMIN')" class="px-2.5 py-1 rounded hover:bg-rose-900/60 hover:text-rose-200 text-slate-300 transition font-medium" title="Admin@123456">Admin</button>
+                    <button onclick="quickLogin('EDITOR')" class="px-2.5 py-1 rounded hover:bg-amber-900/60 hover:text-amber-200 text-slate-300 transition font-medium">Editor</button>
+                    <button onclick="quickLogin('USER')" class="px-2.5 py-1 rounded hover:bg-emerald-900/60 hover:text-emerald-200 text-slate-300 transition font-medium">Aluno</button>
+                    <button onclick="logout()" class="px-2 py-1 rounded hover:bg-slate-700 text-slate-400 transition" title="Sair da conta">Sair</button>
+                </div>
+
+                <a href="/api-docs" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 border border-indigo-500/30 transition flex items-center gap-1 font-medium">
+                    📖 Swagger UI
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGAÇÃO POR ABAS -->
+    <div class="bg-slate-900/60 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto text-sm">
+            <button onclick="switchTab('events')" id="tab-events" class="tab-btn px-4 py-3 font-medium border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2">
+                📅 Eventos Acadêmicos
+            </button>
+            <button onclick="switchTab('subscriptions')" id="tab-subscriptions" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                ✍️ Minhas Inscrições
+            </button>
+            <button onclick="switchTab('certificates')" id="tab-certificates" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                📜 Emissão de Certificados
+            </button>
+            <button onclick="switchTab('users')" id="tab-users" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                👥 Gestão de Usuários
+            </button>
+            <button onclick="switchTab('rbac-matrix')" id="tab-rbac-matrix" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                🛡️ Auditoria de Permissões (RBAC)
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- FEEDBACK / TOAST FLUTUANTE -->
+        <div id="toast" class="hidden fixed bottom-6 right-6 max-w-md p-4 rounded-xl shadow-2xl z-50 text-sm border flex items-center gap-3 transition-all duration-300"></div>
+
+        <!-- ======================================================== -->
+        <!-- ABA 1: EVENTOS ACADÊMICOS -->
+        <!-- ======================================================== -->
+        <section id="view-events" class="tab-view block space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <input type="text" id="event-search" oninput="debounceSearch()" placeholder="Buscar evento por título ou tema..." class="bg-slate-950 border border-slate-700 px-4 py-2 rounded-lg text-sm w-full sm:w-80 focus:outline-none focus:border-indigo-500">
+                    <button onclick="loadEvents()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition">Atualizar</button>
+                </div>
+                <div id="btn-create-event-wrapper">
+                    <!-- Botão renderizado condicionalmente pelo RBAC -->
+                </div>
+            </div>
+
+            <!-- GRID DE EVENTOS -->
+            <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div class="col-span-full py-12 text-center text-slate-500">Carregando eventos...</div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ABA 2: MINHAS INSCRIÇÕES -->
+        <!-- ======================================================== -->
+        <section id="view-subscriptions" class="tab-view hidden space-y-6">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Inscrições Realizadas</h2>
+                    <p class="text-xs text-slate-400">Usuários comuns visualizam apenas as suas; Administradores e Editores visualizam todas as inscrições.</p>
+                </div>
+                <button onclick="loadSubscriptions()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition">Recarregar</button>
+            </div>
+
+            <div id="subscriptions-container" class="space-y-3">
+                <div class="py-12 text-center text-slate-500">Carregando inscrições...</div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ABA 3: CERTIFICADOS ACADÊMICOS -->
+        <!-- ======================================================== -->
+        <section id="view-certificates" class="tab-view hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- FORMULÁRIO DE VALIDAÇÃO PÚBLICA -->
+                <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-4">
+                    <h3 class="font-semibold text-white flex items-center gap-2">
+                        <span>🔍</span> Validação Pública de Autenticidade
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Qualquer pessoa ou instituição pode checar a autenticidade de um certificado emitido inserindo o código de validação único.
+                    </p>
+                    <div class="space-y-2">
+                        <input type="text" id="cert-code-input" placeholder="Ex: CERT-1-1-A9F3C1" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg text-sm uppercase focus:outline-none focus:border-indigo-500">
+                        <button onclick="validateCertificateCode()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg text-sm transition">
+                            Consultar Autenticidade
+                        </button>
+                    </div>
+                    <div id="cert-validation-result" class="hidden p-3 rounded-lg text-xs border"></div>
+                </div>
+
+                <!-- LISTA DE CERTIFICADOS DISPONÍVEIS -->
+                <div class="lg:col-span-2 bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-4">
+                    <h3 class="font-semibold text-white flex items-center gap-2">
+                        <span>📜</span> Meus Certificados para Emissão
+                    </h3>
+                    <p class="text-xs text-slate-400">Clique em qualquer inscrição para gerar o certificado acadêmico oficial com layout de diploma.</p>
+                    <div id="user-certificates-list" class="space-y-3">
+                        <div class="py-6 text-center text-slate-500 text-sm">Carregando certificados...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL / PAINEL VISUAL DO CERTIFICADO OFICIAL -->
+            <div id="certificate-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-2xl relative">
+                    <button onclick="closeCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
+                    
+                    <!-- ÁREA DO DIPLOMA PARA IMPRESSÃO -->
+                    <div id="printable-certificate" class="bg-amber-50 text-slate-900 p-8 sm:p-12 rounded-xl border-8 border-double border-amber-900/40 text-center space-y-6 shadow-inner relative overflow-hidden">
+                        <div class="text-xs tracking-widest text-amber-800 font-semibold uppercase">Centro Universitário Ateneu • Departamento Acadêmico</div>
+                        <h2 class="text-3xl sm:text-4xl text-amber-950 certificate-font font-bold tracking-wider">CERTIFICADO DE CONCLUSÃO</h2>
+                        <div class="w-24 h-1 bg-amber-800/40 mx-auto"></div>
+                        <p class="text-sm sm:text-base leading-relaxed text-slate-800 max-w-xl mx-auto" id="cert-modal-body">
+                            Certificamos que ... participou com êxito do evento ...
+                        </p>
+                        <div class="pt-6 flex justify-between items-end border-t border-amber-900/20 text-xs text-slate-700">
+                            <div>
+                                <p class="font-bold" id="cert-modal-date">Emitido em: --/--/----</p>
+                                <p class="font-mono text-[10px] text-slate-500" id="cert-modal-code">Código: CERT-XXXX</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-40 border-b border-slate-800 mb-1"></div>
+                                <p class="font-semibold text-slate-800">Coordenação de Extensão</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium flex items-center gap-1 transition">
+                            🖨️ Imprimir / Salvar PDF
+                        </button>
+                        <button onclick="closeCertModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ABA 4: GESTÃO DE USUÁRIOS (ADMIN / EDITOR) -->
+        <!-- ======================================================== -->
+        <section id="view-users" class="tab-view hidden space-y-6">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Usuários do Sistema</h2>
+                    <p class="text-xs text-slate-400">Restrito a ADMIN e EDITOR. Usuários comuns não possuem permissão de acesso.</p>
+                </div>
+                <button onclick="loadUsers()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition">Recarregar</button>
+            </div>
+
+            <div class="overflow-x-auto bg-slate-900/80 rounded-xl border border-slate-800">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-950/60 text-xs uppercase text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Nome</th>
+                            <th class="px-4 py-3">Email</th>
+                            <th class="px-4 py-3">Papel (Role)</th>
+                            <th class="px-4 py-3">Ações Permitidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="5" class="py-8 text-center text-slate-500">Faça login como ADMIN ou EDITOR para visualizar a lista.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ABA 5: MATRIZ RBAC LIVE (TESTE E AUDITORIA) -->
+        <!-- ======================================================== -->
+        <section id="view-rbac-matrix" class="tab-view hidden space-y-6">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-2">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <span>🛡️</span> Inspetor de Conformidade da Matriz RBAC
+                </h2>
+                <p class="text-xs text-slate-400">
+                    Esta tabela confronta em tempo real o que o usuário atualmente logado tem permissão de realizar contra a especificação da atividade.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto bg-slate-900/80 rounded-xl border border-slate-800">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-950/60 uppercase text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="px-4 py-3">Endpoint / Ação</th>
+                            <th class="px-4 py-3">Método</th>
+                            <th class="px-4 py-3">Regra da Matriz</th>
+                            <th class="px-4 py-3">Permissão Atual</th>
+                            <th class="px-4 py-3">Teste Rápido</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrix-live-body" class="divide-y divide-slate-800 font-mono">
+                        <!-- Gerado dinamicamente via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- LOG EM TEMPO REAL DE CHAMADA HTTP -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Console de Retorno HTTP da API</span>
+                    <button onclick="clearConsole()" class="text-xs text-slate-500 hover:text-slate-300">Limpar</button>
+                </div>
+                <pre id="api-live-log" class="text-xs font-mono text-emerald-400 bg-slate-900 p-3 rounded-lg overflow-x-auto max-h-48">// Pronto para registrar as requisições...</pre>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE CRIAÇÃO / EDIÇÃO DE EVENTO -->
+    <div id="event-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-white" id="event-modal-title">Criar Evento Acadêmico</h3>
+            <form id="event-form" onsubmit="handleEventSubmit(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="modal-event-id">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Título do Evento *</label>
+                    <input type="text" id="modal-event-title" required class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Descrição</label>
+                    <textarea id="modal-event-desc" rows="3" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Data e Hora *</label>
+                        <input type="datetime-local" id="modal-event-date" required class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Capacidade (Vagas) *</label>
+                        <input type="number" id="modal-event-capacity" min="1" value="100" required class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Localização</label>
+                    <input type="text" id="modal-event-loc" placeholder="Ex: Auditório Central / Online" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium">Salvar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE INTERAÇÃO COM A API -->
+    <script>
+        let currentUser = null;
+        let currentToken = localStorage.getItem('rbac_token') || null;
+        let searchTimeout = null;
+
+        // CONTAS DE DEMONSTRAÇÃO PRÉ-CADASTRADAS PARA TESTES RÁPIDOS
+        const DEMO_ACCOUNTS = {
+            ADMIN: { email: 'admin@eventos.edu.br', password: 'Admin@123456' },
+            EDITOR: { email: 'editor@eventos.edu.br', password: 'EditorPassword123' },
+            USER: { email: 'aluno@eventos.edu.br', password: 'UserPassword123' }
+        };
+
+        async function init() {
+            if (currentToken) {
+                try {
+                    const payload = JSON.parse(atob(currentToken.split('.')[1]));
+                    currentUser = { id: payload.id, role: payload.role, name: payload.name || payload.email };
+                } catch (_) {
+                    logout();
+                }
+            }
+            updateAuthBadge();
+            loadEvents();
+            renderLiveMatrix();
+        }
+
+        function updateAuthBadge() {
+            const badge = document.getElementById('auth-status-badge');
+            const dot = document.getElementById('role-dot');
+            const text = document.getElementById('role-text');
+            const btnCreateWrapper = document.getElementById('btn-create-event-wrapper');
+
+            if (!currentUser) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+                text.textContent = 'PÚBLICO (Deslogado)';
+                badge.className = 'px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 flex items-center gap-2';
+                btnCreateWrapper.innerHTML = '';
+            } else {
+                let colorClass = 'bg-emerald-500';
+                let borderClass = 'border-emerald-500/40 text-emerald-300';
+                if (currentUser.role === 'ADMIN') {
+                    colorClass = 'bg-rose-500';
+                    borderClass = 'border-rose-500/40 text-rose-300';
+                } else if (currentUser.role === 'EDITOR') {
+                    colorClass = 'bg-amber-500';
+                    borderClass = 'border-amber-500/40 text-amber-300';
+                }
+
+                dot.className = `w-2.5 h-2.5 rounded-full ${colorClass}`;
+                text.textContent = `${currentUser.role} • ${currentUser.name || 'Conectado'}`;
+                badge.className = `px-3 py-1.5 rounded-lg bg-slate-800 border ${borderClass} flex items-center gap-2`;
+
+                // ADMIN e EDITOR podem criar evento
+                if (['ADMIN', 'EDITOR'].includes(currentUser.role)) {
+                    btnCreateWrapper.innerHTML = `
+                        <button onclick="openCreateEventModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg text-sm flex items-center gap-1 shadow-md transition">
+                            ➕ Novo Evento
+                        </button>
+                    `;
+                } else {
+                    btnCreateWrapper.innerHTML = '';
+                }
+            }
+            renderLiveMatrix();
+        }
+
+        async function api(path, options = {}) {
+            options.headers = options.headers || {};
+            options.headers['Content-Type'] = 'application/json';
+            if (currentToken) {
+                options.headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+
+            try {
+                const res = await fetch(path, options);
+                let data = null;
+                try { data = await res.json(); } catch (_) {}
+
+                logConsole(options.method || 'GET', path, res.status, data);
+
+                if (!res.ok) {
+                    throw { status: res.status, data };
+                }
+                return data;
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        function logConsole(method, path, status, data) {
+            const el = document.getElementById('api-live-log');
+            const time = new Date().toLocaleTimeString();
+            let statusColor = status >= 200 && status < 300 ? 'text-emerald-400' : (status === 403 ? 'text-amber-400' : 'text-rose-400');
+            el.innerHTML = `[${time}] ${method} ${path} => <span class="${statusColor}">HTTP ${status}</span>\n${JSON.stringify(data, null, 2)}\n\n` + el.innerHTML;
+        }
+
+        function clearConsole() {
+            document.getElementById('api-live-log').innerHTML = '// Console limpo.';
+        }
+
+        async function quickLogin(role) {
+            const creds = DEMO_ACCOUNTS[role];
+            try {
+                // Tenta login direto
+                let res = await fetch('/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(creds)
+                });
+                let data = await res.json();
+
+                // Se não existir, registra automaticamente para facilitar a apresentação
+                if (res.status === 401 || res.status === 404) {
+                    await fetch('/users/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: `${role} Padrão`, email: creds.email, password: creds.password })
+                    });
+                    res = await fetch('/users/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(creds)
+                    });
+                    data = await res.json();
+                }
+
+                if (data.token) {
+                    currentToken = data.token;
+                    localStorage.setItem('rbac_token', data.token);
+                    currentUser = data.user;
+                    updateAuthBadge();
+                    showToast(`Conectado como perfil ${role}!`, 'success');
+                    loadEvents();
+                    loadSubscriptions();
+                }
+            } catch (err) {
+                showToast(`Erro ao conectar como ${role}: ` + (err.data?.error || err.message), 'error');
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            localStorage.removeItem('rbac_token');
+            updateAuthBadge();
+            showToast('Você saiu da conta. Modo PÚBLICO ativo.', 'info');
+            loadEvents();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2';
+            });
+
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).className = 'tab-btn px-4 py-3 font-medium border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2';
+
+            if (tabId === 'subscriptions') loadSubscriptions();
+            if (tabId === 'certificates') loadCertificates();
+            if (tabId === 'users') loadUsers();
+            if (tabId === 'events') loadEvents();
+        }
+
+        // ==========================================
+        // GESTÃO DE EVENTOS
+        // ==========================================
+        async function loadEvents() {
+            const grid = document.getElementById('events-grid');
+            const search = document.getElementById('event-search').value;
+            try {
+                const res = await api(`/events?search=${encodeURIComponent(search)}`);
+                const events = res.data || [];
+
+                if (events.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500">Nenhum evento acadêmico cadastrado no momento.</div>';
+                    return;
+                }
+
+                grid.innerHTML = events.map(e => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-slate-700 transition">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-start gap-2">
+                                <h3 class="font-bold text-white text-base leading-snug">${e.title}</h3>
+                                <span class="text-[11px] px-2 py-0.5 rounded font-mono ${e.available_slots > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800' : 'bg-rose-950/80 text-rose-400 border border-rose-800'}">
+                                    ${e.available_slots} vagas
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 line-clamp-2">${e.description || 'Sem descrição cadastrada.'}</p>
+                            <div class="pt-2 text-xs text-slate-400 space-y-1">
+                                <div>📅 <strong>Data:</strong> ${new Date(e.event_date).toLocaleDateString('pt-BR')} às ${new Date(e.event_date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
+                                <div>📍 <strong>Local:</strong> ${e.location || 'Campus Principal'}</div>
+                                <div>👥 <strong>Inscritos:</strong> ${e.total_subscriptions} de ${e.capacity}</div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-2 mt-4">
+                            <button onclick="subscribeToEvent(${e.id})" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition flex-1">
+                                Inscrever-se
+                            </button>
+                            ${currentUser && ['ADMIN', 'EDITOR'].includes(currentUser.role) ? `
+                                <button onclick="editEvent(${e.id})" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">✏️</button>
+                            ` : ''}
+                            ${currentUser && currentUser.role === 'ADMIN' ? `
+                                <button onclick="deleteEvent(${e.id})" class="px-2.5 py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-lg text-xs">🗑️</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-rose-400">Erro ao carregar eventos: ${err.data?.error || err.message}</div>`;
+            }
+        }
+
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadEvents, 300);
+        }
+
+        async function subscribeToEvent(eventId) {
+            if (!currentUser) {
+                showToast('Apenas participantes autenticados podem se inscrever! Faça login rápido acima.', 'warning');
+                return;
+            }
+            try {
+                await api('/subscriptions', {
+                    method: 'POST',
+                    body: JSON.stringify({ event_id: eventId })
+                });
+                showToast('Inscrição confirmada com sucesso! Certificado pré-gerado.', 'success');
+                loadEvents();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao realizar inscrição.', 'error');
+            }
+        }
+
+        function openCreateEventModal() {
+            document.getElementById('modal-event-id').value = '';
+            document.getElementById('event-form').reset();
+            document.getElementById('event-modal-title').textContent = 'Criar Evento Acadêmico';
+            document.getElementById('event-modal').classList.remove('hidden');
+        }
+
+        async function editEvent(id) {
+            try {
+                const event = await api(`/events/${id}`);
+                document.getElementById('modal-event-id').value = event.id;
+                document.getElementById('modal-event-title').value = event.title;
+                document.getElementById('modal-event-desc').value = event.description || '';
+                document.getElementById('modal-event-capacity').value = event.capacity;
+                document.getElementById('modal-event-loc').value = event.location || '';
+                if (event.event_date) {
+                    const d = new Date(event.event_date);
+                    document.getElementById('modal-event-date').value = d.toISOString().slice(0, 16);
+                }
+                document.getElementById('event-modal-title').textContent = 'Editar Evento Acadêmico';
+                document.getElementById('event-modal').classList.remove('hidden');
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao carregar dados do evento.', 'error');
+            }
+        }
+
+        async function deleteEvent(id) {
+            if (!confirm('Deseja realmente deletar este evento? (Ação exclusiva de ADMIN)')) return;
+            try {
+                await api(`/events/${id}`, { method: 'DELETE' });
+                showToast('Evento excluído com sucesso!', 'success');
+                loadEvents();
+            } catch (err) {
+                showToast(err.data?.error || 'Permissão negada para excluir evento.', 'error');
+            }
+        }
+
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.add('hidden');
+        }
+
+        async function handleEventSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('modal-event-id').value;
+            const payload = {
+                title: document.getElementById('modal-event-title').value,
+                description: document.getElementById('modal-event-desc').value,
+                event_date: new Date(document.getElementById('modal-event-date').value).toISOString(),
+                capacity: parseInt(document.getElementById('modal-event-capacity').value),
+                location: document.getElementById('modal-event-loc').value
+            };
+
+            try {
+                if (id) {
+                    await api(`/events/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+                    showToast('Evento atualizado!', 'success');
+                } else {
+                    await api('/events', { method: 'POST', body: JSON.stringify(payload) });
+                    showToast('Novo evento criado!', 'success');
+                }
+                closeEventModal();
+                loadEvents();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao salvar evento.', 'error');
+            }
+        }
+
+        // ==========================================
+        // GESTÃO DE INSCRIÇÕES
+        // ==========================================
+        async function loadSubscriptions() {
+            const container = document.getElementById('subscriptions-container');
+            if (!currentUser) {
+                container.innerHTML = '<div class="py-12 text-center text-slate-500">Faça login com qualquer perfil para visualizar as inscrições.</div>';
+                return;
+            }
+
+            try {
+                const res = await api('/subscriptions');
+                const subs = res.data || [];
+
+                if (subs.length === 0) {
+                    container.innerHTML = '<div class="py-12 text-center text-slate-500">Nenhuma inscrição encontrada para o seu perfil.</div>';
+                    return;
+                }
+
+                container.innerHTML = subs.map(s => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-white text-sm">${s.event_title}</span>
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                                    Inscrição #${s.subscription_id}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">
+                                <strong>Participante:</strong> ${s.user_name} (${s.user_email}) • 
+                                <strong>Data:</strong> ${new Date(s.event_date).toLocaleDateString('pt-BR')}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="viewCertificate(${s.subscription_id})" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-1">
+                                📜 Emitir Certificado
+                            </button>
+                            <button onclick="cancelSubscription(${s.subscription_id})" class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-lg text-xs transition">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="py-8 text-center text-rose-400">Erro: ${err.data?.error || err.message}</div>`;
+            }
+        }
+
+        async function cancelSubscription(subId) {
+            if (!confirm('Deseja cancelar esta inscrição?')) return;
+            try {
+                await api(`/subscriptions/${subId}`, { method: 'DELETE' });
+                showToast('Inscrição cancelada com sucesso.', 'info');
+                loadSubscriptions();
+                loadEvents();
+            } catch (err) {
+                showToast(err.data?.error || 'Permissão negada ao cancelar.', 'error');
+            }
+        }
+
+        // ==========================================
+        // CERTIFICADOS
+        // ==========================================
+        async function loadCertificates() {
+            const list = document.getElementById('user-certificates-list');
+            if (!currentUser) {
+                list.innerHTML = '<div class="py-6 text-center text-slate-500 text-sm">Faça login para consultar seus certificados.</div>';
+                return;
+            }
+
+            try {
+                const res = await api('/subscriptions');
+                const subs = res.data || [];
+
+                if (subs.length === 0) {
+                    list.innerHTML = '<div class="py-6 text-center text-slate-500 text-sm">Você ainda não possui inscrições para emitir certificados.</div>';
+                    return;
+                }
+
+                list.innerHTML = subs.map(s => `
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold text-white text-sm">${s.event_title}</p>
+                            <p class="text-xs text-slate-400">Participante: ${s.user_name} • Código: ${s.certificate_code || 'Automático'}</p>
+                        </div>
+                        <button onclick="viewCertificate(${s.subscription_id})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition">
+                            Visualizar Certificado
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<div class="py-4 text-center text-rose-400 text-xs">Erro: ${err.data?.error || err.message}</div>`;
+            }
+        }
+
+        async function viewCertificate(id) {
+            try {
+                const res = await api(`/certificates/${id}`);
+                const c = res.certificate;
+
+                document.getElementById('cert-modal-body').textContent = c.declaration;
+                document.getElementById('cert-modal-date').textContent = `Emitido em: ${new Date(c.issued_at).toLocaleDateString('pt-BR')}`;
+                document.getElementById('cert-modal-code').textContent = `Código de Autenticidade: ${c.code}`;
+
+                document.getElementById('certificate-modal').classList.remove('hidden');
+            } catch (err) {
+                showToast(err.data?.error || 'Você não tem permissão para emitir este certificado.', 'error');
+            }
+        }
+
+        function closeCertModal() {
+            document.getElementById('certificate-modal').classList.add('hidden');
+        }
+
+        async function validateCertificateCode() {
+            const code = document.getElementById('cert-code-input').value.trim();
+            const resEl = document.getElementById('cert-validation-result');
+            if (!code) {
+                showToast('Informe o código do certificado.', 'warning');
+                return;
+            }
+
+            try {
+                const res = await api(`/certificates/validate/${encodeURIComponent(code)}`);
+                resEl.className = 'p-3 rounded-lg text-xs border bg-emerald-950/60 border-emerald-800 text-emerald-300 block space-y-1';
+                resEl.innerHTML = `
+                    <div class="font-bold text-sm">✅ Certificado Autêntico e Válido!</div>
+                    <div><strong>Participante:</strong> ${res.certificate.participant_name}</div>
+                    <div><strong>Evento:</strong> ${res.certificate.event_title}</div>
+                    <div><strong>Data de Emissão:</strong> ${new Date(res.certificate.issued_at).toLocaleDateString('pt-BR')}</div>
+                `;
+            } catch (err) {
+                resEl.className = 'p-3 rounded-lg text-xs border bg-rose-950/60 border-rose-800 text-rose-300 block';
+                resEl.textContent = '❌ Certificado inválido ou não encontrado no banco de dados.';
+            }
+        }
+
+        // ==========================================
+        // GESTÃO DE USUÁRIOS (ADMIN / EDITOR)
+        // ==========================================
+        async function loadUsers() {
+            const tbody = document.getElementById('users-table-body');
+            try {
+                const res = await api('/users');
+                const users = res.data || [];
+
+                tbody.innerHTML = users.map(u => `
+                    <tr class="hover:bg-slate-800/40">
+                        <td class="px-4 py-3 font-mono text-xs">${u.id}</td>
+                        <td class="px-4 py-3 font-medium text-white">${u.name}</td>
+                        <td class="px-4 py-3 text-slate-400">${u.email}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-mono ${u.role === 'ADMIN' ? 'bg-rose-950 text-rose-400 border border-rose-800' : (u.role === 'EDITOR' ? 'bg-amber-950 text-amber-400 border border-amber-800' : 'bg-emerald-950 text-emerald-400 border border-emerald-800')}">
+                                ${u.role}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 space-x-2">
+                            <button onclick="editUserName(${u.id}, '${u.name}', '${u.role}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs">Editar</button>
+                            ${currentUser?.role === 'ADMIN' && currentUser.id !== u.id ? `
+                                <button onclick="deleteUser(${u.id})" class="px-2 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 rounded text-xs">Excluir</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Acesso Negado (HTTP ${err.status}): ${err.data?.error || 'Apenas ADMIN e EDITOR podem listar usuários.'}</td></tr>`;
+            }
+        }
+
+        async function editUserName(userId, currentName, targetRole) {
+            const newName = prompt(`Editar nome de [${currentName}] (Perfil: ${targetRole}):`, currentName);
+            if (!newName || newName === currentName) return;
+
+            try {
+                await api(`/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name: newName })
+                });
+                showToast('Usuário atualizado com sucesso!', 'success');
+                loadUsers();
+            } catch (err) {
+                showToast(err.data?.error || 'Acesso negado pela regra RBAC.', 'error');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm(`Confirmar exclusão do usuário ID ${userId}? (Apenas ADMIN)`)) return;
+            try {
+                await api(`/users/${userId}`, { method: 'DELETE' });
+                showToast('Usuário excluído!', 'success');
+                loadUsers();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao excluir usuário.', 'error');
+            }
+        }
+
+        // ==========================================
+        // MATRIZ RBAC LIVE (RENDERIZAÇÃO)
+        // ==========================================
+        function renderLiveMatrix() {
+            const body = document.getElementById('matrix-live-body');
+            const role = currentUser ? currentUser.role : 'PÚBLICO';
+
+            const matrixDef = [
+                { ep: 'GET /events', method: 'GET', rule: 'Livre para todos', check: () => true, test: () => api('/events') },
+                { ep: 'POST /events', method: 'POST', rule: 'Apenas ADMIN e EDITOR', check: () => ['ADMIN', 'EDITOR'].includes(role), test: () => api('/events', { method: 'POST', body: JSON.stringify({ title: 'Teste RBAC', event_date: new Date() }) }) },
+                { ep: 'PUT /events/:id', method: 'PUT', rule: 'Apenas ADMIN e EDITOR', check: () => ['ADMIN', 'EDITOR'].includes(role), test: () => api('/events/1', { method: 'PUT', body: JSON.stringify({ title: 'Editado' }) }) },
+                { ep: 'DELETE /events/:id', method: 'DELETE', rule: 'Exclusivo ADMIN', check: () => role === 'ADMIN', test: () => api('/events/9999', { method: 'DELETE' }) },
+                { ep: 'POST /users/register', method: 'POST', rule: 'Livre para todos', check: () => true, test: () => alert('Use o registro público!') },
+                { ep: 'GET /users', method: 'GET', rule: 'Apenas ADMIN e EDITOR', check: () => ['ADMIN', 'EDITOR'].includes(role), test: () => api('/users') },
+                { ep: 'PUT /users/:id', method: 'PUT', rule: 'ADMIN (qualquer) / EDITOR (apenas USER) / USER (próprio)', check: () => role !== 'PÚBLICO', test: () => api(`/users/${currentUser?.id || 1}`, { method: 'PUT', body: JSON.stringify({ name: 'Nome Teste' }) }) },
+                { ep: 'DELETE /users/:id', method: 'DELETE', rule: 'Exclusivo ADMIN', check: () => role === 'ADMIN', test: () => api('/users/9999', { method: 'DELETE' }) },
+                { ep: 'POST /subscriptions', method: 'POST', rule: 'ADMIN, EDITOR e USER', check: () => role !== 'PÚBLICO', test: () => api('/subscriptions', { method: 'POST', body: JSON.stringify({ event_id: 1 }) }) },
+                { ep: 'GET /subscriptions', method: 'GET', rule: 'ADMIN/EDITOR (todas) - USER (apenas suas)', check: () => role !== 'PÚBLICO', test: () => api('/subscriptions') },
+                { ep: 'GET /certificates/:id', method: 'GET', rule: 'ADMIN/EDITOR (todos) - USER (apenas suas)', check: () => role !== 'PÚBLICO', test: () => api('/certificates/1') }
+            ];
+
+            body.innerHTML = matrixDef.map(item => {
+                const isAllowed = item.check();
+                return `
+                    <tr class="hover:bg-slate-800/40">
+                        <td class="px-4 py-2.5 font-bold text-white">${item.ep}</td>
+                        <td class="px-4 py-2.5 text-indigo-400">${item.method}</td>
+                        <td class="px-4 py-2.5 text-slate-400 font-sans">${item.rule}</td>
+                        <td class="px-4 py-2.5">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isAllowed ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
+                                ${isAllowed ? '✓ PERMITIDO' : '✖ BLOQUEADO (403/401)'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-2.5">
+                            <button onclick="testEndpoint('${item.ep}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] transition">
+                                Disparar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function testEndpoint(ep) {
+            try {
+                if (ep === 'GET /events') await api('/events');
+                else if (ep === 'POST /events') await api('/events', { method: 'POST', body: JSON.stringify({ title: 'Evento Teste RBAC', event_date: new Date().toISOString() }) });
+                else if (ep === 'DELETE /events/:id') await api('/events/9999', { method: 'DELETE' });
+                else if (ep === 'GET /users') await api('/users');
+                else if (ep === 'DELETE /users/:id') await api('/users/9999', { method: 'DELETE' });
+                else if (ep === 'GET /subscriptions') await api('/subscriptions');
+                else if (ep === 'GET /certificates/:id') await api('/certificates/1');
+                else await api(ep.split(' ')[1]);
+                showToast(`Requisição para ${ep} executada! Veja o retorno no console abaixo.`, 'success');
+            } catch (err) {
+                showToast(`Resposta HTTP ${err.status}: ${err.data?.error || 'Acesso negado'}`, err.status === 403 ? 'warning' : 'error');
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            let bg = 'bg-slate-900 border-slate-700 text-slate-200';
+            if (type === 'success') bg = 'bg-emerald-950/95 border-emerald-700 text-emerald-200';
+            if (type === 'error') bg = 'bg-rose-950/95 border-rose-700 text-rose-200';
+            if (type === 'warning') bg = 'bg-amber-950/95 border-amber-700 text-amber-200';
+            toast.className = `fixed bottom-6 right-6 max-w-md p-4 rounded-xl shadow-2xl z-50 text-sm border flex items-center gap-3 transition-all duration-300 ${bg}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
