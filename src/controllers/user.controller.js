@@ -181,11 +181,15 @@ exports.setupDemoAccounts = async (req, res) => {
             ON CONFLICT (email) DO UPDATE SET role = 'EDITOR', password = $1, name = 'Coordenador de Eventos'
         `, [editorPass]);
 
-        // 3. Garante o USER oficial com papel USER
+        // 3. Garante o USER oficial com papel USER e alunos de demonstração
         await db.query(`
             INSERT INTO users (name, email, password, role)
-            VALUES ('Carlos Aluno', 'aluno@eventos.edu.br', $1, 'USER')
-            ON CONFLICT (email) DO UPDATE SET password = $1, name = 'Carlos Aluno'
+            VALUES 
+            ('Carlos Aluno', 'aluno@eventos.edu.br', $1, 'USER'),
+            ('Mariana Silva', 'mariana@eventos.edu.br', $1, 'USER'),
+            ('Lucas Fernandes', 'lucas@eventos.edu.br', $1, 'USER'),
+            ('Beatriz Costa', 'beatriz@eventos.edu.br', $1, 'USER')
+            ON CONFLICT (email) DO UPDATE SET password = $1, role = 'USER'
         `, [userPass]);
 
         // 4. Insere eventos acadêmicos (futuros e passados) se a tabela estiver vazia
@@ -203,29 +207,46 @@ exports.setupDemoAccounts = async (req, res) => {
             `, [adminId]);
         }
 
-        // 5. Garante que o Aluno tenha participação registrada no evento passado para teste de certificação
-        const pastEventRes = await db.query("SELECT id FROM events WHERE title LIKE '%Seminário Nacional de Cibersegurança%' LIMIT 1");
-        const alunoRes = await db.query("SELECT id FROM users WHERE email = 'aluno@eventos.edu.br' LIMIT 1");
-        if (pastEventRes.rows.length > 0 && alunoRes.rows.length > 0) {
-            const pastEventId = pastEventRes.rows[0].id;
-            const alunoId = alunoRes.rows[0].id;
+        // 5. Garante inscrições de Alunos nos eventos para validação de presença e testes de certificação
+        const allEvents = await db.query("SELECT id, title, status FROM events ORDER BY id ASC");
+        const allStudents = await db.query("SELECT id, name, email FROM users WHERE role = 'USER'");
 
-            // Garante que o evento passado esteja marcado como COMPLETED e carga horária 20h
-            await db.query("UPDATE events SET status = 'COMPLETED', workload_hours = 20 WHERE id = $1", [pastEventId]);
-
-            const existingSub = await db.query("SELECT id FROM subscriptions WHERE user_id = $1 AND event_id = $2", [alunoId, pastEventId]);
-            let subId = existingSub.rows[0]?.id;
-            if (!subId) {
-                const subInsert = await db.query("INSERT INTO subscriptions (user_id, event_id, attended) VALUES ($1, $2, true) RETURNING id", [alunoId, pastEventId]);
-                subId = subInsert.rows[0].id;
-            } else {
-                await db.query("UPDATE subscriptions SET attended = true WHERE id = $1", [subId]);
-            }
-
-            const existingCert = await db.query("SELECT id FROM certificates WHERE subscription_id = $1", [subId]);
-            if (existingCert.rows.length === 0) {
-                const certCode = `CERT-${pastEventId}-${subId}-SEC2026`;
-                await db.query("INSERT INTO certificates (subscription_id, certificate_code) VALUES ($1, $2)", [subId, certCode]);
+        for (const ev of allEvents.rows) {
+            const isCompleted = ev.status === 'COMPLETED';
+            for (const st of allStudents.rows) {
+                // Alunos distribuídos nos eventos
+                if (ev.title.includes('Simpósio') && ['aluno@eventos.edu.br', 'mariana@eventos.edu.br', 'lucas@eventos.edu.br'].includes(st.email)) {
+                    await db.query(`
+                        INSERT INTO subscriptions (user_id, event_id, attended)
+                        VALUES ($1, $2, false)
+                        ON CONFLICT (user_id, event_id) DO NOTHING
+                    `, [st.id, ev.id]);
+                } else if (ev.title.includes('Workshop') && ['mariana@eventos.edu.br', 'beatriz@eventos.edu.br'].includes(st.email)) {
+                    await db.query(`
+                        INSERT INTO subscriptions (user_id, event_id, attended)
+                        VALUES ($1, $2, false)
+                        ON CONFLICT (user_id, event_id) DO NOTHING
+                    `, [st.id, ev.id]);
+                } else if (isCompleted) {
+                    // No evento concluído: Carlos e Lucas presentes (com certificado), Beatriz ausente
+                    const shouldAttend = ['aluno@eventos.edu.br', 'lucas@eventos.edu.br'].includes(st.email);
+                    const subRes = await db.query(`
+                        INSERT INTO subscriptions (user_id, event_id, attended)
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT (user_id, event_id) DO UPDATE SET attended = $3
+                        RETURNING id
+                    `, [st.id, ev.id, shouldAttend]);
+                    
+                    const subId = subRes.rows[0]?.id;
+                    if (subId && shouldAttend) {
+                        const certCode = `CERT-${ev.id}-${subId}-${st.email.split('@')[0].toUpperCase()}`;
+                        await db.query(`
+                            INSERT INTO certificates (subscription_id, certificate_code)
+                            VALUES ($1, $2)
+                            ON CONFLICT (subscription_id) DO NOTHING
+                        `, [subId, certCode]);
+                    }
+                }
             }
         }
 
