@@ -1455,21 +1455,41 @@
 
                 document.getElementById('attendance-count-header').textContent = `Participantes Inscritos (${participants.length}):`;
 
+                const isCompleted = e.status === 'COMPLETED';
+                const canEditAttendance = ['ADMIN', 'EDITOR'].includes(currentUser?.role) && !isCompleted;
+
                 if (participants.length === 0) {
                     listEl.innerHTML = '<div class="py-12 text-center text-slate-500">Nenhum participante inscrito neste evento até o momento.</div>';
                     bulkEl.innerHTML = '';
                 } else {
                     const studentParticipants = participants.filter(p => p.user_role === 'USER');
 
-                    bulkEl.innerHTML = ['ADMIN', 'EDITOR'].includes(currentUser?.role) && studentParticipants.length > 0 ? `
-                        <button onclick="markAllAttendance(${eventId}, true)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1">
-                            <span>✓</span> Confirmar Todos os Alunos
-                        </button>
-                    ` : '';
+                    if (isCompleted) {
+                        bulkEl.innerHTML = '<span class="text-[11px] font-bold text-slate-400 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">🔒 Lista Homologada e Fechada</span>';
+                    } else if (['ADMIN', 'EDITOR'].includes(currentUser?.role) && studentParticipants.length > 0) {
+                        bulkEl.innerHTML = `
+                            <button onclick="markAllAttendance(${eventId}, true)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1">
+                                <span>✓</span> Marcar Todos Presentes
+                            </button>
+                        `;
+                    } else {
+                        bulkEl.innerHTML = '';
+                    }
 
-                    listEl.innerHTML = participants.map(p => {
+                    const bannerHtml = isCompleted ? `
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 text-xs flex items-center gap-2 mb-1">
+                            <span class="text-base">🔒</span>
+                            <span><strong>Lista Fechada & Homologada:</strong> O evento já foi concluído pelo Administrador. As presenças estão congeladas para garantia de autenticidade dos diplomas emitidos.</span>
+                        </div>
+                    ` : `
+                        <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs flex items-center gap-2 mb-1">
+                            <span class="text-base">📝</span>
+                            <span><strong>Edição de Presenças Aberta:</strong> Por padrão participantes iniciam como <em>Ausente</em>. Selecione o rádio <strong>Presente</strong> para homologar o participante antes de concluir o evento.</span>
+                        </div>
+                    `;
+
+                    listEl.innerHTML = bannerHtml + participants.map(p => {
                         const hasAttended = !!p.attended;
-                        const canEditAttendance = ['ADMIN', 'EDITOR'].includes(currentUser?.role);
 
                         let roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">🎓 Aluno</span>';
                         if (p.user_role === 'ADMIN') {
@@ -1479,9 +1499,9 @@
                         }
 
                         return `
-                            <div class="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition">
+                            <div class="bg-slate-950/70 p-3.5 rounded-2xl border ${hasAttended ? 'border-emerald-500/20' : 'border-slate-800'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-slate-700 transition">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 flex items-center justify-center">
+                                    <div class="w-9 h-9 rounded-xl ${hasAttended ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700'} text-xs font-bold flex items-center justify-center">
                                         ${escapeHtml((p.user_name || 'U').substring(0, 2).toUpperCase())}
                                     </div>
                                     <div class="space-y-0.5">
@@ -1489,26 +1509,37 @@
                                             <h5 class="text-sm font-bold text-white">${escapeHtml(p.user_name)}</h5>
                                             ${roleBadge}
                                             ${hasAttended ? 
-                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ Presença Confirmada</span>' : 
-                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⏳ Presença Pendente</span>'
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ Presente</span>' : 
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">⏳ Ausente</span>'
                                             }
                                         </div>
                                         <p class="text-xs text-slate-400">${escapeHtml(p.user_email)}</p>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2">
-                                    ${canEditAttendance ? (hasAttended ? `
-                                        <button onclick="toggleAttendanceInModal(${p.subscription_id}, false, ${eventId})" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-rose-500/10 hover:text-rose-300 text-slate-400 border border-slate-700 transition" title="Desmarcar presença">
-                                            Desmarcar ✖
-                                        </button>
-                                    ` : `
-                                        <button onclick="toggleAttendanceInModal(${p.subscription_id}, true, ${eventId})" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-md shadow-emerald-600/20 flex items-center gap-1">
-                                            <span>✓</span> Confirmar Presença
-                                        </button>
-                                    `) : ''}
+                                <div class="flex items-center gap-2 self-end sm:self-center">
+                                    <!-- SELETOR EM RÁDIO DE PRESENÇA (AUSENTE / PRESENTE) -->
+                                    ${canEditAttendance ? `
+                                        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-xs font-medium">
+                                            <label class="flex items-center gap-1.5 px-3 py-1 rounded-lg cursor-pointer transition ${!hasAttended ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30' : 'text-slate-400 hover:text-white'}">
+                                                <input type="radio" name="att_${p.subscription_id}" value="false" ${!hasAttended ? 'checked' : ''} onchange="toggleAttendanceInModal(${p.subscription_id}, false, ${eventId})" class="hidden">
+                                                <span>○ Ausente</span>
+                                            </label>
+                                            <label class="flex items-center gap-1.5 px-3 py-1 rounded-lg cursor-pointer transition ${hasAttended ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30' : 'text-slate-400 hover:text-white'}">
+                                                <input type="radio" name="att_${p.subscription_id}" value="true" ${hasAttended ? 'checked' : ''} onchange="toggleAttendanceInModal(${p.subscription_id}, true, ${eventId})" class="hidden">
+                                                <span>● Presente</span>
+                                            </label>
+                                        </div>
+                                    ` : (isCompleted ? `
+                                        <div class="flex items-center bg-slate-900/60 border border-slate-800/80 rounded-xl px-3 py-1.5 text-xs">
+                                            ${hasAttended ? 
+                                                '<span class="text-emerald-400 font-bold flex items-center gap-1">● Presente (Homologado)</span>' : 
+                                                '<span class="text-slate-500 font-semibold flex items-center gap-1">○ Ausente (Fechado)</span>'
+                                            }
+                                        </div>
+                                    ` : '')}
 
-                                    ${(e.status === 'COMPLETED' && hasAttended) ? `
+                                    ${(isCompleted && hasAttended) ? `
                                         <button onclick="viewCertificate(${p.subscription_id})" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition">
                                             📜 Diploma
                                         </button>
@@ -1520,24 +1551,23 @@
                 }
 
                 // Renderiza Rodapé do Modal conforme Papel RBAC
-                const isCompleted = e.status === 'COMPLETED';
                 if (currentUser?.role === 'ADMIN') {
                     footerEl.innerHTML = `
                         <div class="text-xs text-slate-400">
                             <p class="font-medium text-slate-300">💡 Gestão Geral de Certificação (Admin):</p>
-                            <p class="text-[11px] text-slate-400">Ao concluir o evento, os diplomas são emitidos para todos com presença confirmada.</p>
+                            <p class="text-[11px] text-slate-400">${isCompleted ? 'A lista está homologada. Para editar presenças novamente, reabra o evento.' : 'Ao concluir, a lista de presença é congelada e os certificados ficam liberados aos presentes.'}</p>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                             <button onclick="closeEventAttendanceModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition">
                                 Fechar
                             </button>
                             ${isCompleted ? `
-                                <button onclick="toggleEventStatusFromModal(${eventId}, 'OPEN')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                    <span>🔄</span> Reabrir Evento
+                                <button onclick="toggleEventStatusFromModal(${eventId}, 'OPEN')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5" title="Reabrir evento para permitir edições de presença">
+                                    <span>🔄</span> Reabrir Evento para Edição de Presenças
                                 </button>
                             ` : `
-                                <button onclick="toggleEventStatusFromModal(${eventId}, 'COMPLETED')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5">
-                                    <span>🏁</span> Concluir Evento e Liberar Certificados
+                                <button onclick="toggleEventStatusFromModal(${eventId}, 'COMPLETED')" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5" title="Finalizar o evento e homologar a lista definitiva de presenças">
+                                    <span>🏁</span> Concluir Evento e Confirmar Lista Definitiva
                                 </button>
                             `}
                         </div>
@@ -1546,7 +1576,7 @@
                     footerEl.innerHTML = `
                         <div class="text-xs text-slate-400">
                             <p class="font-medium text-amber-400">✍️ Homologação Editorial (Editor):</p>
-                            <p class="text-[11px] text-slate-400">Você pode confirmar e homologar presenças. A conclusão do evento é prerrogativa do Administrador.</p>
+                            <p class="text-[11px] text-slate-400">${isCompleted ? 'A lista de presença já foi homologada e fechada pelo Administrador.' : 'Você pode alternar as presenças (Presente/Ausente). A confirmação e fechamento definitivo cabe ao Administrador.'}</p>
                         </div>
                         <button onclick="closeEventAttendanceModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium transition">
                             Fechar Lista

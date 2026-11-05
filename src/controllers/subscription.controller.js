@@ -236,6 +236,28 @@ exports.updateAttendance = async (req, res) => {
     const isAttended = attended === true || attended === 'true' || attended === 1;
 
     try {
+        // 1. Verifica se a inscrição existe e qual o status do evento
+        const checkRes = await db.query(
+            `SELECT s.*, e.status as event_status 
+             FROM subscriptions s 
+             JOIN events e ON s.event_id = e.id 
+             WHERE s.id = $1`,
+            [subId]
+        );
+
+        if (checkRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Inscrição não encontrada.' });
+        }
+
+        const sub = checkRes.rows[0];
+
+        // [Regra de Imutabilidade]: Lista fechada e bloqueada após conclusão do evento
+        if (sub.event_status === 'COMPLETED') {
+            return res.status(400).json({
+                error: 'Lista de presença fechada e homologada. O evento já foi concluído pelo Administrador e as presenças estão congeladas. Para editar, o Administrador deve reabrir o evento.'
+            });
+        }
+
         const result = await db.query(
             `UPDATE subscriptions 
              SET attended = $1 
@@ -244,12 +266,8 @@ exports.updateAttendance = async (req, res) => {
             [isAttended, subId]
         );
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Inscrição não encontrada.' });
-        }
-
         res.json({
-            message: isAttended ? 'Presença confirmada com sucesso!' : 'Presença desmarcada.',
+            message: isAttended ? 'Presença confirmada com sucesso!' : 'Presença marcada como ausente.',
             subscription: result.rows[0]
         });
     } catch (error) {
