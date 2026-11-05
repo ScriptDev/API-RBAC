@@ -214,51 +214,70 @@ exports.setupDemoAccounts = async (req, res) => {
         for (const ev of allEvents.rows) {
             const isCompleted = ev.status === 'COMPLETED';
             for (const st of allStudents.rows) {
-                // Alunos distribuídos nos eventos
+                let shouldEnroll = false;
+                let shouldAttend = false;
+
                 if (ev.title.includes('Simpósio') && ['aluno@eventos.edu.br', 'mariana@eventos.edu.br', 'lucas@eventos.edu.br'].includes(st.email)) {
-                    await db.query(`
-                        INSERT INTO subscriptions (user_id, event_id, attended)
-                        VALUES ($1, $2, false)
-                        ON CONFLICT (user_id, event_id) DO NOTHING
-                    `, [st.id, ev.id]);
+                    shouldEnroll = true;
+                    shouldAttend = false;
                 } else if (ev.title.includes('Workshop') && ['mariana@eventos.edu.br', 'beatriz@eventos.edu.br'].includes(st.email)) {
-                    await db.query(`
-                        INSERT INTO subscriptions (user_id, event_id, attended)
-                        VALUES ($1, $2, false)
-                        ON CONFLICT (user_id, event_id) DO NOTHING
-                    `, [st.id, ev.id]);
+                    shouldEnroll = true;
+                    shouldAttend = false;
                 } else if (isCompleted) {
-                    // No evento concluído: Carlos e Lucas presentes (com certificado), Beatriz ausente
-                    const shouldAttend = ['aluno@eventos.edu.br', 'lucas@eventos.edu.br'].includes(st.email);
-                    const subRes = await db.query(`
-                        INSERT INTO subscriptions (user_id, event_id, attended)
-                        VALUES ($1, $2, $3)
-                        ON CONFLICT (user_id, event_id) DO UPDATE SET attended = $3
-                        RETURNING id
-                    `, [st.id, ev.id, shouldAttend]);
-                    
-                    const subId = subRes.rows[0]?.id;
-                    if (subId && shouldAttend) {
-                        const certCode = `CERT-${ev.id}-${subId}-${st.email.split('@')[0].toUpperCase()}`;
-                        await db.query(`
-                            INSERT INTO certificates (subscription_id, certificate_code)
-                            VALUES ($1, $2)
-                            ON CONFLICT (subscription_id) DO NOTHING
-                        `, [subId, certCode]);
+                    shouldEnroll = ['aluno@eventos.edu.br', 'lucas@eventos.edu.br', 'beatriz@eventos.edu.br'].includes(st.email);
+                    shouldAttend = ['aluno@eventos.edu.br', 'lucas@eventos.edu.br'].includes(st.email);
+                }
+
+                if (shouldEnroll) {
+                    const checkSub = await db.query(
+                        "SELECT id FROM subscriptions WHERE user_id = $1 AND event_id = $2",
+                        [st.id, ev.id]
+                    );
+
+                    let subId;
+                    if (checkSub.rows.length === 0) {
+                        const insertSub = await db.query(
+                            "INSERT INTO subscriptions (user_id, event_id, attended) VALUES ($1, $2, $3) RETURNING id",
+                            [st.id, ev.id, shouldAttend]
+                        );
+                        subId = insertSub.rows[0].id;
+                    } else {
+                        subId = checkSub.rows[0].id;
+                        if (isCompleted) {
+                            await db.query("UPDATE subscriptions SET attended = $1 WHERE id = $2", [shouldAttend, subId]);
+                        }
+                    }
+
+                    if (isCompleted && shouldAttend && subId) {
+                        const checkCert = await db.query("SELECT id FROM certificates WHERE subscription_id = $1", [subId]);
+                        if (checkCert.rows.length === 0) {
+                            const certCode = `CERT-${ev.id}-${subId}-${st.email.split('@')[0].toUpperCase()}`;
+                            await db.query(
+                                "INSERT INTO certificates (subscription_id, certificate_code) VALUES ($1, $2)",
+                                [subId, certCode]
+                            );
+                        }
                     }
                 }
             }
         }
 
         // 6. [Regra de Negócio]: Admin e Editor assiduamente inscritos em todos os eventos (Staff / Coordenação sem consumir vagas)
-        await db.query(`
-            INSERT INTO subscriptions (user_id, event_id, attended)
-            SELECT u.id, e.id, true
-            FROM users u
-            CROSS JOIN events e
-            WHERE u.role IN ('ADMIN', 'EDITOR')
-            ON CONFLICT (user_id, event_id) DO NOTHING;
-        `);
+        const staffUsers = await db.query("SELECT id FROM users WHERE role IN ('ADMIN', 'EDITOR')");
+        for (const stf of staffUsers.rows) {
+            for (const ev of allEvents.rows) {
+                const checkStaffSub = await db.query(
+                    "SELECT id FROM subscriptions WHERE user_id = $1 AND event_id = $2",
+                    [stf.id, ev.id]
+                );
+                if (checkStaffSub.rows.length === 0) {
+                    await db.query(
+                        "INSERT INTO subscriptions (user_id, event_id, attended) VALUES ($1, $2, true)",
+                        [stf.id, ev.id]
+                    );
+                }
+            }
+        }
 
         res.json({ message: 'Ambiente de demonstração e eventos de teste preparados com sucesso!' });
     } catch (err) {
