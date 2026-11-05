@@ -20,6 +20,8 @@ exports.list = async (req, res) => {
                 e.event_date, 
                 e.location, 
                 e.capacity, 
+                COALESCE(e.status, 'OPEN') as status,
+                COALESCE(e.workload_hours, 20)::int as workload_hours,
                 e.created_by,
                 u.name as organizer_name,
                 COUNT(s.id)::int as total_subscriptions,
@@ -97,6 +99,8 @@ exports.getById = async (req, res) => {
                 e.event_date, 
                 e.location, 
                 e.capacity, 
+                COALESCE(e.status, 'OPEN') as status,
+                COALESCE(e.workload_hours, 20)::int as workload_hours,
                 e.created_by,
                 u.name as organizer_name,
                 COUNT(s.id)::int as total_subscriptions,
@@ -244,5 +248,40 @@ exports.remove = async (req, res) => {
     } catch (error) {
         console.error('[EventController.remove] Erro:', error);
         res.status(500).json({ error: 'Erro interno ao excluir evento.' });
+    }
+};
+
+/**
+ * Conclusão ou alteração de status do evento acadêmico
+ * Matriz RBAC: ADMIN ✓ | EDITOR ✖ | USER ✖ | PÚBLICO ✖
+ */
+exports.updateStatus = async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    const { status } = req.body;
+
+    if (!status || !['OPEN', 'COMPLETED', 'CANCELLED'].includes(status.toUpperCase())) {
+        return res.status(400).json({ error: 'Status inválido. Use OPEN, COMPLETED ou CANCELLED.' });
+    }
+
+    try {
+        const result = await db.query(
+            `UPDATE events 
+             SET status = $1 
+             WHERE id = $2 
+             RETURNING id, title, status, event_date, location, capacity`,
+            [status.toUpperCase(), eventId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Evento não encontrado.' });
+        }
+
+        res.json({
+            message: `Evento marcado como ${status.toUpperCase()} com sucesso!`,
+            event: result.rows[0]
+        });
+    } catch (error) {
+        console.error('[EventController.updateStatus] Erro:', error);
+        res.status(500).json({ error: 'Erro interno ao atualizar status do evento.' });
     }
 };

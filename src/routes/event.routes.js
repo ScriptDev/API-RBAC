@@ -16,8 +16,9 @@ router.post('/', authenticate, authorize(['ADMIN', 'EDITOR']), eventController.c
 router.put('/:id', authenticate, authorize(['ADMIN', 'EDITOR']), eventController.update);
 
 // ==========================================
-// ROTA EXCLUSIVA DE ADMIN
+// ROTAS EXCLUSIVAS DE ADMIN
 // ==========================================
+router.patch('/:id/status', authenticate, authorize(['ADMIN']), eventController.updateStatus);
 router.delete('/:id', authenticate, authorize(['ADMIN']), eventController.remove);
 
 module.exports = router;

@@ -16,4 +16,7 @@ router.get('/', authenticate, authorize(['ADMIN', 'EDITOR', 'USER']), subscripti
 // Cancelar inscrição (ADMIN ou o próprio USER)
 router.delete('/:id', authenticate, authorize(['ADMIN', 'EDITOR', 'USER']), subscriptionController.remove);
 
+// Confirmar/Alterar presença de participante (ADMIN e EDITOR)
+router.patch('/:id/attendance', authenticate, authorize(['ADMIN', 'EDITOR']), subscriptionController.updateAttendance);
+
 module.exports = router;

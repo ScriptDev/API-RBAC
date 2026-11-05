@@ -25,13 +25,16 @@ exports.getById = async (req, res) => {
                 c.issued_at,
                 s.id as subscription_id,
                 s.user_id,
+                COALESCE(s.attended, false) as attended,
                 u.name as participant_name,
                 u.email as participant_email,
                 e.id as event_id,
                 e.title as event_title,
                 e.description as event_description,
                 e.event_date,
-                e.location as event_location
+                e.location as event_location,
+                COALESCE(e.status, 'OPEN') as event_status,
+                COALESCE(e.workload_hours, 20)::int as workload_hours
             FROM subscriptions s
             JOIN users u ON s.user_id = u.id
             JOIN events e ON s.event_id = e.id
@@ -56,6 +59,30 @@ exports.getById = async (req, res) => {
             });
         }
 
+        // =========================================================================
+        // REGRAS DE NEGÓCIO DE CERTIFICAÇÃO ACADÊMICA:
+        // 1. O evento deve ter sido finalizado/concluído pelo ADMIN (status = 'COMPLETED')
+        // 2. A presença do participante deve ter sido confirmada pelo EDITOR ou ADMIN (attended = true)
+        // 3. Estar apenas inscrito NÃO garante certificado. Se não confirmado, fica bloqueado com feedback.
+        // =========================================================================
+        if (req.user.role === 'USER') {
+            if (data.event_status !== 'COMPLETED') {
+                return res.status(400).json({
+                    error: 'Certificado indisponível. O evento acadêmico ainda não foi finalizado e concluído pela administração.',
+                    code: 'EVENT_NOT_COMPLETED',
+                    feedback: 'Os certificados são liberados após o encerramento oficial do evento pelo Administrador.'
+                });
+            }
+
+            if (!data.attended) {
+                return res.status(403).json({
+                    error: 'Certificado bloqueado. Sua presença não foi confirmada pela coordenação do evento.',
+                    code: 'ATTENDANCE_NOT_CONFIRMED',
+                    feedback: 'O simples fato de estar inscrito não garante a certificação. É necessária a confirmação de presença (check-in) pelo Coordenador/Editor.'
+                });
+            }
+        }
+
         // Se a inscrição existe mas o certificado ainda não tinha registro na tabela
         let certCode = data.certificate_code;
         let issuedAt = data.issued_at;
@@ -73,13 +100,14 @@ exports.getById = async (req, res) => {
             issuedAt = certInsert.rows[0].issued_at;
         }
 
-        // Retorna o certificado emitido com layout acadêmico completo
+        // Retorna o certificado emitido com layout acadêmico completo e assinaturas
         res.json({
             status: 'VALID',
             certificate: {
                 id: certId,
                 code: certCode,
                 issued_at: issuedAt,
+                workload_hours: data.workload_hours,
                 participant: {
                     id: data.user_id,
                     name: data.participant_name,
@@ -90,9 +118,23 @@ exports.getById = async (req, res) => {
                     title: data.event_title,
                     description: data.event_description,
                     date: data.event_date,
-                    location: data.event_location
+                    location: data.event_location,
+                    status: data.event_status,
+                    workload_hours: data.workload_hours
                 },
-                declaration: `Certificamos que ${data.participant_name} participou com êxito do evento acadêmico "${data.event_title}", realizado em ${new Date(data.event_date).toLocaleDateString('pt-BR')}.`,
+                declaration: `Certificamos para os devidos fins curriculares e acadêmicos que ${data.participant_name} participou e concluiu com êxito as atividades programadas do evento acadêmico "${data.event_title}", realizado em ${new Date(data.event_date).toLocaleDateString('pt-BR')} no local ${data.event_location || 'Campus Universitário Central'}, integralizando a carga horária de ${data.workload_hours} horas de atividades complementares.`,
+                signatures: [
+                    {
+                        name: 'Prof. Dr. Roberto Albuquerque',
+                        role: 'Coordenador Acadêmico de Extensão',
+                        institution: 'Centro Universitário Ateneu'
+                    },
+                    {
+                        name: 'Dra. Helena Vasconcelos',
+                        role: 'Diretoria de Ensino e Pesquisa',
+                        institution: 'Centro Universitário Ateneu'
+                    }
+                ],
                 verification_url: `/certificates/validate/${certCode}`
             }
         });

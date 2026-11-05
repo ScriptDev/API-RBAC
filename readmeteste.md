@@ -470,8 +470,10 @@ Abaixo está o resumo executivo dos critérios de aceite de cada endpoint para f
 | **Deletar Usuário** | `/users/:id` | `DELETE` | ✓ | ✖ | ✖ | ✖ | `200 OK` | `401 / 403` |
 | **Inscrever-se em Evento** | `/subscriptions` | `POST` | ✓ | ✓ | ✓ *(Apenas Atuais/Futuros)* | ✖ | `201 Created` | `400 (Lotado/Expirado) / 409 (Duplicado)` |
 | **Listar Inscrições** | `/subscriptions` | `GET` | ✓ *(Todas)* | ✓ *(Todas)* | ✓ *(Apenas as suas)* | ✖ | `200 OK` | `401 Unauthorized` |
+| **Confirmar Presença (Check-in)** | `/subscriptions/:id/attendance` | `PATCH` | ✓ | ✓ | ✖ | ✖ | `200 OK` | `401 / 403 Forbidden` |
 | **Cancelar Inscrição** | `/subscriptions/:id` | `DELETE` | ✓ | ✓ | ✓ *(Apenas a sua)* | ✖ | `200 OK` | `403 Forbidden` |
-| **Emitir Certificado** | `/certificates/:id` | `GET` | ✓ | ✓ | ✓ *(Apenas o seu)* | ✖ | `200 OK` | `401 / 403` |
+| **Concluir Evento Acadêmico** | `/events/:id/status` | `PATCH` | ✓ | ✖ | ✖ | ✖ | `200 OK` | `401 / 403 Forbidden` |
+| **Emitir Certificado** | `/certificates/:id` | `GET` | ✓ | ✓ | ✓ *(Presença + Concluído)* | ✖ | `200 OK` | `400 / 401 / 403` |
 | **Validação de Código Hash**| `/certificates/validate/:code` | `GET` | ✓ | ✓ | ✓ | ✓ | `200 OK` | `404 Not Found` |
 
 ---
@@ -489,6 +491,38 @@ Para atender estritamente ao domínio acadêmico e à integridade operacional:
    - **Segregação Visual para Aluno (`USER`):** O aluno visualiza estritamente os eventos passados em que **participou (estava inscrito)**. Eventos passados de terceiros são filtrados para não poluir sua visão acadêmica.
    - **Emissão Direta de Certificado:** No card e no modal do evento passado em que o aluno participou, exibe-se o badge `🎓 Concluído • Você Participou` e o botão direto `🎓 Ver Certificado`, abrindo instantaneamente o diploma com validação criptográfica.
    - **Visão Editorial (ADMIN e EDITOR):** Têm acesso global e irrestrito a todo o histórico de eventos da instituição para auditoria, emissão de relatórios e planejamento no Calendário Editorial.
+
+---
+
+### 8.2 Ciclo Completo de Certificação, Homologação e Bloqueio com Feedback
+
+O simples ato de se inscrever em um evento acadêmico **NÃO garante a obtenção do certificado**. Para que o diploma seja emitido, dois critérios mandatórios de engenharia e negócio devem ser satisfeitos:
+
+1. **Poder de Conclusão do Evento (Exclusivo do ADMIN):**
+   - O Administrador Geral possui o poder de finalizar e dar o evento como concluído através de `PATCH /events/:id/status` (`status: 'COMPLETED'`) ou pelo botão **🏁 Concluir** no painel web.
+
+2. **Poder de Homologação de Presença (EDITOR e ADMIN):**
+   - Na aba de Inscrições, o Coordenador/Editor e o Administrador possuem o controle de check-in através de `PATCH /subscriptions/:id/attendance` ou pelo botão **Confirmar Presença ✓**.
+
+3. **Matriz de Feedback Instrucional ao Aluno:**
+   - **Se o evento ainda estiver em andamento:**
+     O certificado fica bloqueado com feedback visual amarelo:
+     *`⏳ Evento Acadêmico em Andamento: O certificado será liberado após a conclusão oficial do evento pelo Administrador e a validação de sua presença.`*
+   - **Se o evento foi concluído, mas o aluno NÃO teve presença confirmada:**
+     O certificado é sumariamente bloqueado com feedback visual vermelho e status `HTTP 403`:
+     *`⚠️ Presença Não Registrada: O evento foi finalizado, mas sua presença não foi homologada pela coordenação. O simples fato de estar inscrito não garante a certificação.`*
+   - **Se o evento foi concluído E a presença foi confirmada:**
+     O certificado é homologado e liberado com feedback verde e botão dourado:
+     *`🏆 Presença Confirmada & Homologada! Seu certificado oficial integraliza a carga horária acadêmica.`*
+
+4. **Lâmina do Diploma Acadêmico & Download em PDF:**
+   - Ao abrir o diploma, o sistema apresenta a lâmina oficial universitária formatada com:
+     - Nome completo do participante e nome do evento;
+     - Carga horária complementar oficial em destaque (ex: 20 Horas);
+     - Data do evento, local e data de emissão;
+     - Código de autenticidade criptográfica com URL pública de validação;
+     - **2 Assinaturas Institucionais Formatadas:** Coordenação Acadêmica de Extensão e Diretoria Geral / Reitoria;
+     - Botão funcional **`🖨️ Baixar em PDF / Imprimir Diploma`** acionando o spooler de impressão nativo com regras `@media print` para folha A4 paisagem sem artefatos de navegador.
 
 ---
 

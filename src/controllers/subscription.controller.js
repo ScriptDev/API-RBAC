@@ -108,6 +108,7 @@ exports.list = async (req, res) => {
             SELECT 
                 s.id as subscription_id,
                 s.created_at as subscription_date,
+                COALESCE(s.attended, false) as attended,
                 u.id as user_id,
                 u.name as user_name,
                 u.email as user_email,
@@ -115,6 +116,8 @@ exports.list = async (req, res) => {
                 e.title as event_title,
                 e.event_date,
                 e.location as event_location,
+                COALESCE(e.status, 'OPEN') as event_status,
+                COALESCE(e.workload_hours, 20)::int as workload_hours,
                 c.id as certificate_id,
                 c.certificate_code,
                 c.issued_at as certificate_issued_at
@@ -209,5 +212,38 @@ exports.remove = async (req, res) => {
     } catch (error) {
         console.error('[SubscriptionController.remove] Erro:', error);
         res.status(500).json({ error: 'Erro interno ao cancelar inscrição.' });
+    }
+};
+
+/**
+ * Confirmação ou cancelamento de presença do participante (Check-in)
+ * Matriz RBAC: ADMIN ✓ | EDITOR ✓ | USER ✖ | PÚBLICO ✖
+ */
+exports.updateAttendance = async (req, res) => {
+    const subId = parseInt(req.params.id);
+    const { attended } = req.body;
+
+    const isAttended = attended === true || attended === 'true' || attended === 1;
+
+    try {
+        const result = await db.query(
+            `UPDATE subscriptions 
+             SET attended = $1 
+             WHERE id = $2 
+             RETURNING id, user_id, event_id, attended, created_at`,
+            [isAttended, subId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Inscrição não encontrada.' });
+        }
+
+        res.json({
+            message: isAttended ? 'Presença confirmada com sucesso!' : 'Presença desmarcada.',
+            subscription: result.rows[0]
+        });
+    } catch (error) {
+        console.error('[SubscriptionController.updateAttendance] Erro:', error);
+        res.status(500).json({ error: 'Erro interno ao atualizar presença do participante.' });
     }
 };

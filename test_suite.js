@@ -274,6 +274,10 @@ async function runTests() {
         const certOtherUser = await request('GET', `/certificates/${sub1Id}`, null, tokenUser2);
         assert(certOtherUser.status === 403, 'GET /certificates/:id: USER não pode acessar certificado de outro participante (403)', '', ['user', 'certificates', 'certs']);
 
+        // Homologação de Presença (pelo Editor) e Conclusão do Evento (pelo Admin) para emissão de certificado
+        await request('PATCH', `/subscriptions/${sub1Id}/attendance`, { attended: true }, tokenEditor);
+        await request('PATCH', `/events/${eventId}/status`, { status: 'COMPLETED' }, tokenAdmin);
+
         // USER 1 acessando o seu próprio certificado
         const certOwnUser = await request('GET', `/certificates/${sub1Id}`, null, tokenUser1);
         assert(certOwnUser.status === 200 && certOwnUser.body.certificate.code, 'GET /certificates/:id: USER acessa seu próprio certificado com sucesso (200)', '', ['user', 'certificates', 'certs']);

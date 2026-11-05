@@ -195,11 +195,11 @@ exports.setupDemoAccounts = async (req, res) => {
             const adminId = adminRes.rows[0]?.id || null;
 
             await db.query(`
-                INSERT INTO events (title, description, event_date, location, capacity, created_by)
+                INSERT INTO events (title, description, event_date, location, capacity, status, workload_hours, created_by)
                 VALUES 
-                ('Simpósio de Inteligência Artificial e Engenharia de Software 2026', 'Palestrantes abordando agentes autônomos, LLMs, Clean Architecture e DevSecOps.', CURRENT_TIMESTAMP + INTERVAL '15 days', 'Auditório Nobre Central', 100, $1),
-                ('Workshop de Microsserviços e Segurança RBAC com Node.js', 'Construção prática de APIs REST com autenticação JWT, controle de acesso e Docker.', CURRENT_TIMESTAMP + INTERVAL '7 days', 'Laboratório de Informática 3', 2, $1),
-                ('Seminário Nacional de Cibersegurança e Proteção de Dados (Edição Anterior)', 'Boas práticas OWASP, Zero-Trust e proteção contra vazamento de credenciais.', CURRENT_TIMESTAMP - INTERVAL '10 days', 'Auditório Nobre Central', 50, $1)
+                ('Simpósio de Inteligência Artificial e Engenharia de Software 2026', 'Palestrantes abordando agentes autônomos, LLMs, Clean Architecture e DevSecOps.', CURRENT_TIMESTAMP + INTERVAL '15 days', 'Auditório Nobre Central', 100, 'OPEN', 30, $1),
+                ('Workshop de Microsserviços e Segurança RBAC com Node.js', 'Construção prática de APIs REST com autenticação JWT, controle de acesso e Docker.', CURRENT_TIMESTAMP + INTERVAL '7 days', 'Laboratório de Informática 3', 2, 'OPEN', 15, $1),
+                ('Seminário Nacional de Cibersegurança e Proteção de Dados (Edição Anterior)', 'Boas práticas OWASP, Zero-Trust e proteção contra vazamento de credenciais.', CURRENT_TIMESTAMP - INTERVAL '10 days', 'Auditório Nobre Central', 50, 'COMPLETED', 20, $1)
             `, [adminId]);
         }
 
@@ -209,12 +209,19 @@ exports.setupDemoAccounts = async (req, res) => {
         if (pastEventRes.rows.length > 0 && alunoRes.rows.length > 0) {
             const pastEventId = pastEventRes.rows[0].id;
             const alunoId = alunoRes.rows[0].id;
+
+            // Garante que o evento passado esteja marcado como COMPLETED e carga horária 20h
+            await db.query("UPDATE events SET status = 'COMPLETED', workload_hours = 20 WHERE id = $1", [pastEventId]);
+
             const existingSub = await db.query("SELECT id FROM subscriptions WHERE user_id = $1 AND event_id = $2", [alunoId, pastEventId]);
             let subId = existingSub.rows[0]?.id;
             if (!subId) {
-                const subInsert = await db.query("INSERT INTO subscriptions (user_id, event_id) VALUES ($1, $2) RETURNING id", [alunoId, pastEventId]);
+                const subInsert = await db.query("INSERT INTO subscriptions (user_id, event_id, attended) VALUES ($1, $2, true) RETURNING id", [alunoId, pastEventId]);
                 subId = subInsert.rows[0].id;
+            } else {
+                await db.query("UPDATE subscriptions SET attended = true WHERE id = $1", [subId]);
             }
+
             const existingCert = await db.query("SELECT id FROM certificates WHERE subscription_id = $1", [subId]);
             if (existingCert.rows.length === 0) {
                 const certCode = `CERT-${pastEventId}-${subId}-SEC2026`;

@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS events (
     event_date TIMESTAMP NOT NULL,
     location VARCHAR(255),
     capacity INTEGER DEFAULT 100,
+    status VARCHAR(50) DEFAULT 'OPEN',
+    workload_hours INTEGER DEFAULT 20,
     created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -38,6 +40,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    attended BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT subscriptions_user_id_event_id_key UNIQUE (user_id, event_id)
 );
