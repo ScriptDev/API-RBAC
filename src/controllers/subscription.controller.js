@@ -115,6 +115,7 @@ exports.list = async (req, res) => {
 
         let query = `
             SELECT 
+                s.id,
                 s.id as subscription_id,
                 s.created_at as subscription_date,
                 COALESCE(s.attended, false) as attended,

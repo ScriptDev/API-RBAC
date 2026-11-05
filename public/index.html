@@ -42,8 +42,8 @@
             
             <!-- LOGOTIPO & IDENTIDADE VISUAL -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('events')">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
-                    🎓
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
@@ -73,14 +73,16 @@
 
                 <!-- ÁREA DINÂMICA DE LOGIN / LOGOUT -->
                 <div id="auth-action-container" class="flex items-center gap-2">
-                    <button onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-1.5">
-                        <span>🔐</span> Entrar / Cadastrar
+                    <button onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Entrar / Cadastrar</span>
                     </button>
                 </div>
 
                 <!-- LINK DIRETO SWAGGER UI -->
-                <a href="/api-docs" target="_blank" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition flex items-center gap-1 font-medium">
-                    📖 Swagger
+                <a href="/api-docs" target="_blank" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition flex items-center gap-1.5 font-medium">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    <span>Swagger UI</span>
                 </a>
             </div>
         </div>
@@ -92,20 +94,25 @@
     <div class="bg-slate-900/60 border-b border-slate-800/80 sticky top-[69px] z-30 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex space-x-2 overflow-x-auto custom-scrollbar text-sm py-1.5">
             <button onclick="switchTab('events')" id="tab-events" class="tab-btn px-4 py-2.5 rounded-xl font-medium text-indigo-400 bg-indigo-600/10 border border-indigo-500/30 flex items-center gap-2 transition">
-                📅 Eventos Acadêmicos
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Eventos Acadêmicos</span>
             </button>
             <button onclick="switchTab('subscriptions')" id="tab-subscriptions" class="tab-btn px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
-                ✍️ Minhas Inscrições
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span>Minhas Inscrições</span>
             </button>
             <button onclick="switchTab('certificates')" id="tab-certificates" class="tab-btn px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
-                📜 Certificados & Validação
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Certificados & Validação</span>
             </button>
             <button onclick="switchTab('users')" id="tab-users" class="tab-btn px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
-                👥 Gestão de Usuários
-                <span id="tab-users-lock" class="text-xs text-slate-500">🔒</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span>Gestão de Usuários</span>
+                <svg id="tab-users-lock" class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </button>
             <button onclick="switchTab('rbac-matrix')" id="tab-rbac-matrix" class="tab-btn px-4 py-2.5 rounded-xl font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent flex items-center gap-2 transition">
-                🛡️ Matriz de Auditoria RBAC
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Matriz de Auditoria RBAC</span>
             </button>
         </div>
     </div>
@@ -137,8 +144,8 @@
             <!-- CARDS DE MÉTRICAS EXECUTIVAS (KPIS ACADÊMICOS) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-indigo-500/30 transition shadow-lg">
-                    <div class="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-xl">
-                        📅
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </div>
                     <div>
                         <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Eventos Ativos</span>
@@ -150,8 +157,8 @@
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-emerald-500/30 transition shadow-lg">
-                    <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl">
-                        👥
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     </div>
                     <div>
                         <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Inscrições Discentes</span>
@@ -163,8 +170,8 @@
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-amber-500/30 transition shadow-lg">
-                    <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl">
-                        🏆
+                    <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
                     </div>
                     <div>
                         <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Diplomas Emitidos</span>
@@ -176,8 +183,8 @@
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-violet-500/30 transition shadow-lg">
-                    <div class="w-11 h-11 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center justify-center text-xl">
-                        ⏱️
+                    <div class="w-11 h-11 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div>
                         <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Carga Horária Média</span>
@@ -193,7 +200,9 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-800 shadow-md">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <div class="relative w-full sm:w-96">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">🔍</span>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </span>
                         <input type="text" id="event-search" oninput="debounceSearch()" placeholder="Buscar evento por título ou tema..." class="w-full bg-slate-950/80 border border-slate-700/80 pl-10 pr-9 py-2.5 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition placeholder:text-slate-500">
                         <button id="btn-clear-search" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white text-xs font-bold transition" title="Limpar busca">&times;</button>
                     </div>
@@ -212,21 +221,25 @@
                     <button onclick="setEventFilter('all')" id="btn-filter-all" class="px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white transition">
                         Todos (<span id="count-all">0</span>)
                     </button>
-                    <button onclick="setEventFilter('future')" id="btn-filter-future" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition">
-                        🟢 Futuros & Atuais (<span id="count-future">0</span>)
+                    <button onclick="setEventFilter('future')" id="btn-filter-future" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                        <span>Futuros & Atuais (<span id="count-future">0</span>)</span>
                     </button>
-                    <button onclick="setEventFilter('past')" id="btn-filter-past" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition">
-                        ⚪ Expirados / Concluídos (<span id="count-past">0</span>)
+                    <button onclick="setEventFilter('past')" id="btn-filter-past" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+                        <span>Expirados / Concluídos (<span id="count-past">0</span>)</span>
                     </button>
                 </div>
 
                 <!-- ALTERNADOR DE MODO (CARDS VS CALENDÁRIO) -->
                 <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
                     <button onclick="setEventViewMode('grid')" id="btn-view-grid" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition flex items-center gap-1.5">
-                        <span>🗂️</span> Grade de Cards
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span>Grade de Cards</span>
                     </button>
                     <button onclick="setEventViewMode('calendar')" id="btn-view-calendar" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
-                        <span>📆</span> Calendário Editorial
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Calendário Editorial</span>
                     </button>
                 </div>
             </div>
@@ -234,7 +247,9 @@
             <!-- 1. MODO GRADE DE CARDS -->
             <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-full py-16 text-center text-slate-400">
-                    <div class="inline-block p-4 rounded-2xl bg-slate-900 border border-slate-800 mb-3">🎓</div>
+                    <div class="inline-block p-4 rounded-2xl bg-slate-900 border border-slate-800 mb-3 text-indigo-400 animate-pulse">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
+                    </div>
                     <p class="font-medium text-white">Carregando catálogo de eventos...</p>
                 </div>
             </div>
@@ -245,7 +260,8 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
                     <div>
                         <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
-                            <span>📆</span> Calendário Editorial Acadêmico
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Calendário Editorial Acadêmico</span>
                         </h3>
                         <p class="text-xs text-slate-400">Navegue pelas datas passadas e futuras para gerenciar a programação institucional.</p>
                     </div>
@@ -282,7 +298,8 @@
             <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span>✍️</span> Inscrições Confirmadas
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        <span>Inscrições Confirmadas</span>
                     </h2>
                     <p class="text-xs text-slate-400 mt-1">
                         Participantes comuns visualizam estritamente as suas próprias inscrições. Administradores e Editores visualizam todas as inscrições institucionais.
@@ -305,7 +322,7 @@
                 <!-- CONSULTA PÚBLICA DE AUTENTICIDADE -->
                 <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
                     <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-xl border border-indigo-500/20">
-                        🔍
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <div>
                         <h3 class="font-bold text-white text-base">Validação Pública de Diploma</h3>
@@ -325,7 +342,8 @@
                 <!-- MEUS CERTIFICADOS EMITIDOS -->
                 <div class="lg:col-span-2 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
                     <h3 class="font-bold text-white text-base flex items-center gap-2">
-                        <span>📜</span> Meus Diplomas Acadêmicos
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                        <span>Meus Diplomas Acadêmicos</span>
                     </h3>
                     <p class="text-xs text-slate-400">Clique em qualquer inscrição concluída para abrir e imprimir o diploma formatado para A4.</p>
                     <div id="user-certificates-list" class="space-y-3 pt-2">
@@ -342,7 +360,8 @@
             <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span>👥</span> Gestão Corporativa de Usuários
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <span>Gestão Corporativa de Usuários</span>
                     </h2>
                     <p class="text-xs text-slate-400 mt-1">
                         Acesso exclusivo para <strong>ADMIN</strong> (pleno controle) e <strong>EDITOR</strong> (apenas contas USER). Usuários comuns são barrados pelo RBAC (`403`).
@@ -375,7 +394,8 @@
         <section id="view-rbac-matrix" class="tab-view hidden space-y-6">
             <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 space-y-2">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <span>🛡️</span> Matriz de Controle de Acesso (RBAC)
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span>Matriz de Controle de Acesso (RBAC)</span>
                 </h2>
                 <p class="text-xs text-slate-400">
                     Auditoria visual confrontando as permissões do usuário atualmente conectado contra a especificação formal do sistema.
@@ -409,7 +429,7 @@
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xl shadow-inner">
-                    🎓
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
                 </div>
                 <div>
                     <p class="text-white font-bold text-sm">Centro Universitário Ateneu</p>
@@ -419,10 +439,10 @@
 
             <!-- BADGES DE ARQUITETURA E SEGURANÇA -->
             <div class="flex items-center gap-2 flex-wrap justify-center">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🛡️ DevSecOps Ready</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🏛️ Clean Architecture</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🔐 JWT + RBAC Strict</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">📜 SHA-256 Validated</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 flex items-center gap-1.5"><svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>DevSecOps Ready</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 flex items-center gap-1.5"><svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>Clean Architecture</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 flex items-center gap-1.5"><svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>JWT + RBAC Strict</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300 flex items-center gap-1.5"><svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>SHA-256 Validated</span>
             </div>
 
             <!-- ASSINATURA TÉCNICA E LINKS -->
@@ -448,8 +468,8 @@
 
             <!-- CABEÇALHO DO MODAL -->
             <div class="text-center space-y-1">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 mx-auto flex items-center justify-center text-2xl border border-indigo-500/20 mb-2">
-                    🎓
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 mx-auto flex items-center justify-center border border-indigo-500/20 mb-2">
+                    <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
                 </div>
                 <h3 class="text-xl font-extrabold text-white" id="auth-modal-title">Acessar Plataforma</h3>
                 <p class="text-xs text-slate-400" id="auth-modal-desc">Entre com suas credenciais ou crie sua conta de aluno</p>
@@ -485,18 +505,21 @@
 
             <!-- ACESSO RÁPIDO PARA DEMONSTRAÇÃO ACADÊMICA (1-CLIQUE) -->
             <div class="pt-4 border-t border-slate-800 space-y-2.5">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center">⚡ Acesso Rápido para Apresentação (1-Clique):</p>
+                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>Acesso Rápido para Apresentação (1-Clique):</span>
+                </p>
                 <div class="grid grid-cols-3 gap-2 text-xs font-medium">
-                    <button type="button" onclick="quickLogin('ADMIN')" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1 transition">
-                        <span class="text-sm">👑</span>
+                    <button type="button" onclick="quickLogin('ADMIN')" class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1.5 transition">
+                        <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         <span>Admin</span>
                     </button>
-                    <button type="button" onclick="quickLogin('EDITOR')" class="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex flex-col items-center gap-1 transition">
-                        <span class="text-sm">✍️</span>
+                    <button type="button" onclick="quickLogin('EDITOR')" class="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex flex-col items-center gap-1.5 transition">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         <span>Editor</span>
                     </button>
-                    <button type="button" onclick="quickLogin('USER')" class="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition">
-                        <span class="text-sm">🎓</span>
+                    <button type="button" onclick="quickLogin('USER')" class="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1.5 transition">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                         <span>Aluno</span>
                     </button>
                 </div>
@@ -601,7 +624,8 @@
 
             <div class="flex justify-end gap-3 pt-2">
                 <button onclick="window.print()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold flex items-center gap-2 transition shadow-lg shadow-indigo-600/20">
-                    <span>🖨️</span> Imprimir / Salvar em PDF
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Imprimir / Salvar em PDF</span>
                 </button>
                 <button onclick="closeCertModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-medium transition">
                     Fechar
@@ -630,19 +654,31 @@
             <!-- INFORMAÇÕES LOGÍSTICAS & ESTRUTURAIS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/70 p-4 rounded-2xl border border-slate-800 text-xs">
                 <div class="space-y-1">
-                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">📅 Data e Horário:</span>
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Data e Horário:</span>
+                    </span>
                     <p class="text-white font-medium text-sm" id="details-date">--/--/---- às --:--</p>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">📍 Local / Ambiente:</span>
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Local / Ambiente:</span>
+                    </span>
                     <p class="text-white font-medium text-sm" id="details-location">Auditório</p>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">👤 Organizador / Responsável:</span>
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span>Organizador / Responsável:</span>
+                    </span>
                     <p class="text-slate-300 font-medium" id="details-organizer">Coordenação</p>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">👥 Vagas & Lotação:</span>
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span>Vagas & Lotação:</span>
+                    </span>
                     <p class="text-slate-300 font-medium" id="details-capacity-text">0 / 0 vagas preenchidas</p>
                 </div>
             </div>
@@ -771,53 +807,59 @@
             const actionContainer = document.getElementById('auth-action-container');
             const usersLock = document.getElementById('tab-users-lock');
 
+            const SVG_LOCK = `<svg class="w-3.5 h-3.5 text-slate-500 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>`;
+            const SVG_CHECK = `<svg class="w-3.5 h-3.5 text-emerald-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+
             if (!currentUser) {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
                 text.textContent = 'PÚBLICO (Visitante)';
                 badge.className = 'px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/70 flex items-center gap-2';
                 btnCreateWrapper.innerHTML = '';
-                usersLock.textContent = '🔒';
+                if (usersLock) usersLock.outerHTML = `<span id="tab-users-lock">${SVG_LOCK}</span>`;
 
                 actionContainer.innerHTML = `
-                    <button onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-1.5">
-                        <span>🔐</span> Entrar / Cadastrar
+                    <button onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Entrar / Cadastrar</span>
                     </button>
                 `;
             } else {
                 let colorClass = 'bg-emerald-500';
                 let borderClass = 'border-emerald-500/30 text-emerald-300 bg-emerald-500/10';
-                let roleIcon = '🎓';
+                let roleIconSvg = `<svg class="w-3.5 h-3.5 text-emerald-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>`;
 
                 if (currentUser.role === 'ADMIN') {
                     colorClass = 'bg-rose-500';
                     borderClass = 'border-rose-500/30 text-rose-300 bg-rose-500/10';
-                    roleIcon = '👑';
+                    roleIconSvg = `<svg class="w-3.5 h-3.5 text-rose-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`;
                 } else if (currentUser.role === 'EDITOR') {
                     colorClass = 'bg-amber-500';
                     borderClass = 'border-amber-500/30 text-amber-300 bg-amber-500/10';
-                    roleIcon = '✍️';
+                    roleIconSvg = `<svg class="w-3.5 h-3.5 text-amber-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`;
                 }
 
                 dot.className = `w-2.5 h-2.5 rounded-full ${colorClass}`;
-                text.innerHTML = `<span class="font-bold">${currentUser.role}</span> • ${currentUser.name || currentUser.email}`;
+                text.innerHTML = `<span class="flex items-center gap-1.5">${roleIconSvg} <span class="font-bold">${currentUser.role}</span> • ${escapeHtml(currentUser.name || currentUser.email)}</span>`;
                 badge.className = `px-3.5 py-1.5 rounded-xl border ${borderClass} flex items-center gap-2`;
 
                 // ADMIN e EDITOR podem criar eventos
                 if (['ADMIN', 'EDITOR'].includes(currentUser.role)) {
                     btnCreateWrapper.innerHTML = `
                         <button onclick="openCreateEventModal()" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition">
-                            <span>➕</span> Novo Evento
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Novo Evento</span>
                         </button>
                     `;
-                    usersLock.textContent = '✓';
+                    if (usersLock) usersLock.outerHTML = `<span id="tab-users-lock">${SVG_CHECK}</span>`;
                 } else {
                     btnCreateWrapper.innerHTML = '';
-                    usersLock.textContent = '🔒';
+                    if (usersLock) usersLock.outerHTML = `<span id="tab-users-lock">${SVG_LOCK}</span>`;
                 }
 
                 actionContainer.innerHTML = `
-                    <button onclick="logout()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium transition flex items-center gap-1">
-                        <span>🚪</span> Sair
+                    <button onclick="logout()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
                     </button>
                 `;
             }
@@ -1041,11 +1083,11 @@
                 const btnPast = document.getElementById('btn-filter-past');
                 if (btnPast) {
                     if (isUser) {
-                        btnPast.innerHTML = `🎓 Meus Concluídos (<span id="count-past">${pastCount}</span>)`;
+                        btnPast.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span> Meus Concluídos (<span id="count-past">${pastCount}</span>)`;
                     } else if (isPrivileged) {
-                        btnPast.innerHTML = `⚪ Histórico Geral (<span id="count-past">${pastCount}</span>)`;
+                        btnPast.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400 inline-block mr-1"></span> Histórico Geral (<span id="count-past">${pastCount}</span>)`;
                     } else {
-                        btnPast.innerHTML = `⚪ Concluídos (<span id="count-past">0</span>)`;
+                        btnPast.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400 inline-block mr-1"></span> Concluídos (<span id="count-past">0</span>)`;
                     }
                 }
 
@@ -1087,7 +1129,9 @@
             if (!filtered || filtered.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full py-16 text-center bg-slate-900/40 rounded-3xl border border-slate-800 p-8 space-y-3">
-                        <span class="text-4xl">📅</span>
+                        <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-800 text-indigo-400 flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
                         <h3 class="text-lg font-bold text-white">Nenhum evento neste período</h3>
                         <p class="text-xs text-slate-400 max-w-sm mx-auto">
                             ${currentEventFilter === 'past' && currentUser?.role === 'USER' ? 
@@ -1116,12 +1160,12 @@
                         <div class="space-y-3">
                             <div class="flex items-center justify-between gap-2 flex-wrap">
                                 ${isPast ? (userSub ? 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">🎓 Concluído • Você Participou</span>' : 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>'
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>Concluído • Participou</span>' : 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">Encerrado / Histórico</span>'
                                 ) : (userSub ? 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>Inscrito ✓</span>' : 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span><svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Inscrito</span>' : 
                                     (isFull ? 
-                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">🔴 Esgotado</span>' : 
+                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">Esgotado</span>' : 
                                         '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span></span>Inscrições Abertas</span>'
                                     )
                                 )}
@@ -1133,14 +1177,17 @@
                             
                             <div class="space-y-1.5 pt-2 text-xs text-slate-300 font-medium">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-slate-500">📅</span> <span>${eventDateFormatted}</span>
+                                    <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>${eventDateFormatted}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-slate-500">📍</span> <span>${escapeHtml(e.location || 'Campus Universitário')}</span>
+                                    <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>${escapeHtml(e.location || 'Campus Universitário')}</span>
                                 </div>
                                 ${e.organizer_name ? `
                                     <div class="flex items-center gap-2 text-slate-400 text-[11px]">
-                                        <span>👤</span> <span>Organizador: ${escapeHtml(e.organizer_name)}</span>
+                                        <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        <span>Organizador: ${escapeHtml(e.organizer_name)}</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -1161,26 +1208,29 @@
                         <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2 flex-1">
                                 ${isPast ? (userSub ? `
-                                    <button onclick="viewCertificate(${userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white shadow-md shadow-amber-600/20 transition flex items-center justify-center gap-1.5">
-                                        <span>🎓</span> Ver Certificado
+                                    <button onclick="viewCertificate(${userSub.subscription_id || userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white shadow-md shadow-amber-600/20 transition flex items-center justify-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                        <span>Ver Certificado</span>
                                     </button>
                                 ` : `
                                     <span class="flex-1 py-2.5 text-center text-xs font-semibold text-slate-500 bg-slate-800/40 rounded-xl">Evento Concluído</span>
                                 `) : (userSub ? `
-                                    <button onclick="cancelSubscription(${userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-300 hover:border-rose-500/30 transition flex items-center justify-center gap-1.5 group/btn" title="Clique para cancelar sua vaga">
-                                        <span class="group-hover/btn:hidden">Inscrito ✓</span>
+                                    <button onclick="cancelSubscription(${userSub.subscription_id || userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-300 hover:border-rose-500/30 transition flex items-center justify-center gap-1.5 group/btn" title="Clique para cancelar sua vaga">
+                                        <span class="group-hover/btn:hidden flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Inscrito</span></span>
                                         <span class="hidden group-hover/btn:inline">Cancelar Vaga</span>
                                     </button>
                                 ` : (isFull ? `
                                     <span class="flex-1 py-2.5 text-center text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">Esgotado</span>
                                 ` : `
                                     <button onclick="subscribeToEvent(${e.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
-                                        <span>✍️</span> Inscrever-se
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                        <span>Inscrever-se</span>
                                     </button>
                                 `))}
 
-                                <button onclick="openEventDetailsModal(${e.id})" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-1" title="Ver detalhes completos do evento">
-                                    <span>🔍</span> Detalhes
+                                <button onclick="openEventDetailsModal(${e.id})" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5" title="Ver detalhes completos do evento">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <span>Detalhes</span>
                                 </button>
                             </div>
 
@@ -1188,29 +1238,32 @@
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${currentUser?.role === 'ADMIN' ? (
                                     e.status === 'COMPLETED' ? `
-                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition font-semibold flex items-center gap-1" title="Visualizar Lista de Presença e Status">
-                                            <span>🔄</span> Presença (Concluído)
+                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition font-semibold flex items-center gap-1.5" title="Visualizar Lista de Presença e Status">
+                                            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span>Presença (Fechada)</span>
                                         </button>
                                     ` : `
-                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1" title="Ver Participantes, Confirmar Presença e Concluir Evento">
-                                            <span>🏁</span> Concluir Evento
+                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5" title="Ver Participantes, Confirmar Presença e Concluir Evento">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>Concluir Evento</span>
                                         </button>
                                     `
                                 ) : (currentUser?.role === 'EDITOR' ? `
-                                    <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1" title="Confirmar Presença dos Participantes">
-                                        <span>👥</span> Confirmar Presença
+                                    <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5" title="Confirmar Presença dos Participantes">
+                                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                        <span>Confirmar Presença</span>
                                     </button>
                                 ` : '')}
 
                                 ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? `
                                     <button onclick="openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Editar Evento">
-                                        ✏️
+                                        <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                     </button>
                                 ` : ''}
 
                                 ${currentUser?.role === 'ADMIN' ? `
                                     <button onclick="deleteEvent(${e.id})" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition" title="Excluir Evento (Apenas Admin)">
-                                        🗑️
+                                        <svg class="w-3.5 h-3.5 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 ` : ''}
                             </div>
@@ -1251,19 +1304,19 @@
             const badgesEl = document.getElementById('details-badges');
             let badgesHtml = '';
             if (e.status === 'COMPLETED') {
-                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">🏁 Evento Concluído</span>';
+                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Evento Concluído</span></span>';
             } else {
-                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">🟢 Inscrições Abertas</span>';
+                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span><span>Inscrições Abertas</span></span>';
             }
 
             if (userSub) {
                 if (userSub.attended) {
-                    badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">✅ Presença Homologada</span>';
+                    badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Presença Homologada</span></span>';
                 } else {
-                    badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">Inscrito ✓</span>';
+                    badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Inscrito</span></span>';
                 }
             } else if (isFull) {
-                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">🔴 Esgotado</span>';
+                badgesHtml += '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span><span>Esgotado</span></span>';
             }
             badgesEl.innerHTML = badgesHtml;
 
@@ -1273,7 +1326,7 @@
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-200 flex items-center justify-between gap-3';
                 statusBox.innerHTML = `
                     <div class="space-y-0.5">
-                        <p class="font-bold text-sm text-emerald-300 flex items-center gap-1.5"><span>🏆</span> Presença Confirmada e Evento Concluído!</p>
+                        <p class="font-bold text-sm text-emerald-300 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Presença Confirmada e Evento Concluído!</span></p>
                         <p class="text-xs text-emerald-200/80">Sua participação nas ${e.workload_hours || 20} horas de atividades acadêmicas foi homologada pela coordenação. Seu diploma está pronto para emissão e download em PDF.</p>
                     </div>
                 `;
@@ -1281,7 +1334,7 @@
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-rose-500/10 border-rose-500/30 text-rose-200 flex items-center justify-between gap-3';
                 statusBox.innerHTML = `
                     <div class="space-y-0.5">
-                        <p class="font-bold text-sm text-rose-300 flex items-center gap-1.5"><span>⚠️</span> Certificado Bloqueado: Presença Não Registrada</p>
+                        <p class="font-bold text-sm text-rose-300 flex items-center gap-2"><svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Certificado Bloqueado: Presença Não Registrada</span></p>
                         <p class="text-xs text-rose-200/80">O evento foi finalizado, mas sua presença não foi confirmada pelo coordenador/editor. O simples fato de estar inscrito não garante a certificação.</p>
                     </div>
                 `;
@@ -1289,19 +1342,19 @@
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-amber-500/10 border-amber-500/30 text-amber-200 flex items-center justify-between gap-3';
                 statusBox.innerHTML = `
                     <div class="space-y-0.5">
-                        <p class="font-bold text-sm text-amber-300 flex items-center gap-1.5"><span>⏳</span> Inscrição Ativa • Evento em Andamento</p>
+                        <p class="font-bold text-sm text-amber-300 flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Inscrição Ativa • Evento em Andamento</span></p>
                         <p class="text-xs text-amber-200/80">Sua vaga está garantida (#${userSub.id}). O certificado será liberado após o encerramento do evento e a confirmação de presença pela coordenação.</p>
                     </div>
                 `;
             } else if (e.status === 'COMPLETED') {
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-slate-950 border-slate-800 text-slate-400';
-                statusBox.innerHTML = `<p>⚪ Este evento acadêmico já foi finalizado. Inscrições encerradas.</p>`;
+                statusBox.innerHTML = `<p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span><span>Este evento acadêmico já foi finalizado. Inscrições encerradas.</span></p>`;
             } else if (isFull) {
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-rose-500/10 border-rose-500/30 text-rose-300';
-                statusBox.innerHTML = `<p class="font-bold">🔴 Lotação Máxima: Todas as ${e.capacity} vagas deste evento foram preenchidas.</p>`;
+                statusBox.innerHTML = `<p class="font-bold flex items-center gap-2 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span><span>Lotação Máxima: Todas as ${e.capacity} vagas deste evento foram preenchidas.</span></p>`;
             } else {
                 statusBox.className = 'p-4 rounded-2xl border text-xs bg-indigo-500/10 border-indigo-500/30 text-indigo-300';
-                statusBox.innerHTML = `<p>🟢 Inscrições Abertas (${e.workload_hours || 20} horas complementares). Garanta sua participação!</p>`;
+                statusBox.innerHTML = `<p class="flex items-center gap-2 text-indigo-300"><span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span><span>Inscrições Abertas (${e.workload_hours || 20} horas complementares). Garanta sua participação!</span></p>`;
             }
 
             // Ações do Rodapé do Modal
@@ -1313,7 +1366,7 @@
                 if (e.status === 'COMPLETED' && userSub.attended) {
                     actionsHtml += `
                         <button onclick="closeEventDetailsModal(); viewCertificate(${userSub.id})" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-amber-600/20 transition">
-                            <span>🎓</span> Visualizar Meu Certificado / Diploma (PDF)
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg><span>Visualizar Meu Certificado / Diploma (PDF)</span>
                         </button>
                     `;
                 } else if (e.status !== 'COMPLETED') {
@@ -1326,7 +1379,7 @@
             } else if (e.status !== 'COMPLETED' && !isFull) {
                 actionsHtml += `
                     <button onclick="closeEventDetailsModal(); subscribeToEvent(${e.id})" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition">
-                        <span>✍️</span> Inscrever-se Neste Evento
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg><span>Inscrever-se Neste Evento</span>
                     </button>
                 `;
             }
@@ -1335,13 +1388,13 @@
             if (currentUser?.role === 'ADMIN') {
                 actionsHtml += `
                     <button onclick="closeEventDetailsModal(); openEventAttendanceModal(${e.id})" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
-                        <span>📋</span> Presença & Conclusão
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span>Presença & Conclusão</span>
                     </button>
                 `;
             } else if (currentUser?.role === 'EDITOR') {
                 actionsHtml += `
                     <button onclick="closeEventDetailsModal(); openEventAttendanceModal(${e.id})" class="px-4 py-2.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 font-bold rounded-xl text-xs transition flex items-center gap-1.5">
-                        <span>👥</span> Confirmar Presença dos Inscritos
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span>Confirmar Presença dos Inscritos</span>
                     </button>
                 `;
             }
@@ -1350,14 +1403,14 @@
             if (['ADMIN', 'EDITOR'].includes(currentUser?.role)) {
                 actionsHtml += `
                     <button onclick="closeEventDetailsModal(); openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
-                        <span>✏️</span> Editar
+                        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg><span>Editar</span>
                     </button>
                 `;
             }
             if (currentUser?.role === 'ADMIN') {
                 actionsHtml += `
                     <button onclick="closeEventDetailsModal(); deleteEvent(${e.id})" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-medium border border-rose-500/30 transition flex items-center gap-1.5">
-                        <span>🗑️</span> Excluir
+                        <svg class="w-4 h-4 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg><span>Excluir</span>
                     </button>
                 `;
             }
@@ -1529,7 +1582,7 @@
             const badgesEl = document.getElementById('attendance-modal-badges');
             badgesEl.innerHTML = `
                 <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${isCompleted ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                    ${isCompleted ? '🏁 Evento Concluído' : '🟢 Evento Aberto / Em Andamento'}
+                    ${isCompleted ? '<span class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Evento Concluído</span></span>' : '<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span><span>Evento Aberto / Em Andamento</span></span>'}
                 </span>
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800">ID #${e.id}</span>
             `;
@@ -1572,11 +1625,11 @@
                     const studentParticipants = participants.filter(p => p.user_role === 'USER');
 
                     if (isCompleted) {
-                        bulkEl.innerHTML = '<span class="text-[11px] font-bold text-slate-400 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">🔒 Lista Homologada e Fechada</span>';
+                        bulkEl.innerHTML = '<span class="text-[11px] font-bold text-slate-400 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800 flex items-center"><svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Lista Homologada e Fechada</span></span>';
                     } else if (['ADMIN', 'EDITOR'].includes(currentUser?.role) && studentParticipants.length > 0) {
                         bulkEl.innerHTML = `
                             <button onclick="markAllAttendance(${eventId}, true)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1">
-                                <span>✓</span> Marcar Todos Presentes
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Marcar Todos Presentes</span>
                             </button>
                         `;
                     } else {
@@ -1585,12 +1638,12 @@
 
                     const bannerHtml = isCompleted ? `
                         <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 text-xs flex items-center gap-2 mb-1">
-                            <span class="text-base">🔒</span>
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                             <span><strong>Lista Fechada & Homologada:</strong> O evento já foi concluído pelo Administrador. As presenças estão congeladas para garantia de autenticidade dos diplomas emitidos.</span>
                         </div>
                     ` : `
                         <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs flex items-center gap-2 mb-1">
-                            <span class="text-base">📝</span>
+                            <svg class="w-5 h-5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             <span><strong>Edição de Presenças Aberta:</strong> Por padrão participantes iniciam como <em>Ausente</em>. Selecione o rádio <strong>Presente</strong> para homologar o participante antes de concluir o evento.</span>
                         </div>
                     `;
@@ -1598,11 +1651,11 @@
                     listEl.innerHTML = bannerHtml + participants.map(p => {
                         const hasAttended = !!p.attended;
 
-                        let roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">🎓 Aluno</span>';
+                        let roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1"><svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg><span>Aluno</span></span>';
                         if (p.user_role === 'ADMIN') {
-                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20">👑 Admin (Staff Assíduo)</span>';
+                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20 flex items-center gap-1"><svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>Admin (Staff Assíduo)</span></span>';
                         } else if (p.user_role === 'EDITOR') {
-                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">✍️ Editor (Coordenação)</span>';
+                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 flex items-center gap-1"><svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>Editor (Coordenação)</span></span>';
                         }
 
                         return `
@@ -1616,8 +1669,8 @@
                                             <h5 class="text-sm font-bold text-white">${escapeHtml(p.user_name)}</h5>
                                             ${roleBadge}
                                             ${hasAttended ? 
-                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ Presente</span>' : 
-                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">⏳ Ausente</span>'
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Presente</span></span>' : 
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span><span>Ausente</span></span>'
                                             }
                                         </div>
                                         <p class="text-xs text-slate-400">${escapeHtml(p.user_email)}</p>
@@ -1648,7 +1701,7 @@
 
                                     ${(isCompleted && hasAttended) ? `
                                         <button onclick="viewCertificate(${p.subscription_id})" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition">
-                                            📜 Diploma
+                                            Diploma
                                         </button>
                                     ` : ''}
                                 </div>
@@ -1661,7 +1714,7 @@
                 if (currentUser?.role === 'ADMIN') {
                     footerEl.innerHTML = `
                         <div class="text-xs text-slate-400">
-                            <p class="font-medium text-slate-300">💡 Gestão Geral de Certificação (Admin):</p>
+                            <p class="font-medium text-slate-300 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Gestão Geral de Certificação (Admin):</span></p>
                             <p class="text-[11px] text-slate-400">${isCompleted ? 'A lista está homologada. Para editar presenças novamente, reabra o evento.' : 'Ao concluir, a lista de presença é congelada e os certificados ficam liberados aos presentes.'}</p>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -1670,11 +1723,11 @@
                             </button>
                             ${isCompleted ? `
                                 <button onclick="toggleEventStatusFromModal(${eventId}, 'OPEN')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5" title="Reabrir evento para permitir edições de presença">
-                                    <span>🔄</span> Reabrir Evento para Edição de Presenças
+                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg><span>Reabrir Evento para Edição de Presenças</span>
                                 </button>
                             ` : `
                                 <button onclick="toggleEventStatusFromModal(${eventId}, 'COMPLETED')" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5" title="Finalizar o evento e homologar a lista definitiva de presenças">
-                                    <span>🏁</span> Concluir Evento e Confirmar Lista Definitiva
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Concluir Evento e Confirmar Lista Definitiva</span>
                                 </button>
                             `}
                         </div>
@@ -1682,7 +1735,7 @@
                 } else if (currentUser?.role === 'EDITOR') {
                     footerEl.innerHTML = `
                         <div class="text-xs text-slate-400">
-                            <p class="font-medium text-amber-400">✍️ Homologação Editorial (Editor):</p>
+                            <p class="font-medium text-amber-400 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>Homologação Editorial (Editor):</span></p>
                             <p class="text-[11px] text-slate-400">${isCompleted ? 'A lista de presença já foi homologada e fechada pelo Administrador.' : 'Você pode alternar as presenças (Presente/Ausente). A confirmação e fechamento definitivo cabe ao Administrador.'}</p>
                         </div>
                         <button onclick="closeEventAttendanceModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium transition">
@@ -1780,20 +1833,22 @@
                     const hasAttended = !!s.attended;
                     const canCertify = isCompleted && hasAttended;
 
+                    const subId = s.subscription_id || s.id;
+
                     // LAYOUT PARA ADMIN E EDITOR (Gestão de Presenças e Auditoria)
                     if (isStaff) {
                         return `
                             <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition">
                                 <div class="space-y-1.5 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Inscrição #${s.id}</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 font-mono">Inscrição #${subId}</span>
                                         ${isCompleted ? 
-                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">🏁 Concluído</span>' : 
-                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">🟢 Em Andamento</span>'
+                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1"><svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Concluído</span></span>' : 
+                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block"></span><span>Em Andamento</span></span>'
                                         }
                                         ${hasAttended ? 
-                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ Presença Confirmada</span>' : 
-                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⏳ Presença Pendente</span>'
+                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Presença Confirmada</span></span>' : 
+                                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span><span>Presença Pendente</span></span>'
                                         }
                                         <span class="text-[10px] text-slate-400 font-mono">Carga: ${s.workload_hours || 20}h</span>
                                     </div>
@@ -1803,22 +1858,23 @@
 
                                 <div class="flex items-center gap-2 flex-wrap">
                                     ${hasAttended ? `
-                                        <button onclick="toggleAttendance(${s.id}, false)" class="px-3 py-2 bg-slate-800 hover:bg-rose-500/10 hover:text-rose-300 text-slate-400 border border-slate-700 rounded-xl text-xs font-medium transition" title="Desfazer confirmação de presença">
-                                            Desmarcar Presença ✖
+                                        <button onclick="toggleAttendance(${subId}, false)" class="px-3 py-2 bg-slate-800 hover:bg-rose-500/10 hover:text-rose-300 text-slate-400 border border-slate-700 rounded-xl text-xs font-medium transition" title="Desfazer confirmação de presença">
+                                            Desmarcar Presença
                                         </button>
                                     ` : `
-                                        <button onclick="toggleAttendance(${s.id}, true)" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5">
-                                            <span>✓</span> Confirmar Presença
+                                        <button onclick="toggleAttendance(${subId}, true)" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Confirmar Presença</span>
                                         </button>
                                     `}
 
-                                    <button onclick="viewCertificate(${s.id})" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl text-xs transition">
-                                        Diploma
+                                    <button onclick="viewCertificate(${subId})" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl text-xs transition flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                        <span>Diploma</span>
                                     </button>
 
                                     ${currentUser.role === 'ADMIN' ? `
-                                        <button onclick="cancelSubscription(${s.id})" class="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs transition" title="Remover Inscrição">
-                                            🗑️
+                                        <button onclick="cancelSubscription(${subId})" class="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs transition" title="Remover Inscrição">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     ` : ''}
                                 </div>
@@ -1833,29 +1889,29 @@
                     if (!isCompleted) {
                         feedbackBox = `
                             <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center gap-2.5">
-                                <span class="text-base">⏳</span>
+                                <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <div>
                                     <p class="font-bold text-amber-300">Evento Acadêmico em Andamento</p>
                                     <p class="text-[11px] text-amber-200/80">O certificado está bloqueado. Ele será emitido automaticamente após a conclusão oficial do evento pelo Administrador e a validação de sua presença.</p>
                                 </div>
                             </div>
                         `;
-                        actionBtn = `<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 text-slate-500 border border-slate-700/60 rounded-xl text-xs font-medium cursor-not-allowed">🔒 Aguardando Conclusão</button>`;
+                        actionBtn = `<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 text-slate-500 border border-slate-700/60 rounded-xl text-xs font-medium cursor-not-allowed"><svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Aguardando Conclusão</span></button>`;
                     } else if (!hasAttended) {
                         feedbackBox = `
                             <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2.5">
-                                <span class="text-base">⚠️</span>
+                                <svg class="w-5 h-5 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                 <div>
                                     <p class="font-bold text-rose-300">Presença Não Registrada</p>
                                     <p class="text-[11px] text-rose-200/80">O evento foi finalizado, mas sua presença não foi homologada pela coordenação. O simples fato de estar inscrito não garante a emissão do certificado acadêmico.</p>
                                 </div>
                             </div>
                         `;
-                        actionBtn = `<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 text-rose-400/60 border border-rose-500/20 rounded-xl text-xs font-medium cursor-not-allowed">🔒 Presença Não Confirmada</button>`;
+                        actionBtn = `<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 text-rose-400/60 border border-rose-500/20 rounded-xl text-xs font-medium cursor-not-allowed"><svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Presença Não Confirmada</span></button>`;
                     } else {
                         feedbackBox = `
                             <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2.5">
-                                <span class="text-base">🏆</span>
+                                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <div>
                                     <p class="font-bold text-emerald-300">Presença Confirmada & Homologada!</p>
                                     <p class="text-[11px] text-emerald-200/80">Sua participação foi validada com sucesso. Seu certificado oficial integraliza ${s.workload_hours || 20} horas de atividades complementares.</p>
@@ -1863,8 +1919,9 @@
                             </div>
                         `;
                         actionBtn = `
-                            <button onclick="viewCertificate(${s.id})" class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-1.5">
-                                <span>🎓</span> Abrir Diploma / Certificado (PDF)
+                            <button onclick="viewCertificate(${subId})" class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                <span>Abrir Diploma / Certificado (PDF)</span>
                             </button>
                         `;
                     }
@@ -1875,7 +1932,7 @@
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Inscrição #${s.id}</span>
-                                        <span class="text-xs text-slate-400 font-mono">📅 ${new Date(s.event_date).toLocaleDateString('pt-BR')}</span>
+                                        <span class="text-xs text-slate-400 font-mono flex items-center gap-1"><svg class="w-3.5 h-3.5 text-slate-500 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>${new Date(s.event_date).toLocaleDateString('pt-BR')}</span></span>
                                     </div>
                                     <h4 class="font-bold text-base text-white mt-1">${escapeHtml(s.event_title)}</h4>
                                     <p class="text-xs text-slate-400">Local: ${escapeHtml(s.event_location || 'Campus Universitário')} • Carga: ${s.workload_hours || 20}h</p>
@@ -1901,7 +1958,7 @@
                 if (eligible.length === 0) {
                     certList.innerHTML = `
                         <div class="col-span-full py-12 text-center bg-slate-900/40 rounded-2xl border border-slate-800 p-6 space-y-2">
-                            <span class="text-3xl">📜</span>
+                            <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-800 text-amber-400 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg></div>
                             <p class="text-sm font-bold text-white">Nenhum certificado emitido até o momento</p>
                             <p class="text-xs text-slate-400 max-w-md mx-auto">Para liberar certificações, o evento acadêmico precisa ser concluído pelo Administrador e a sua presença precisa ser confirmada pela coordenação.</p>
                         </div>
@@ -1917,8 +1974,9 @@
                                 <h4 class="font-bold text-base text-white">${escapeHtml(s.event_title)}</h4>
                                 <p class="text-xs text-slate-400">Participante: <strong class="text-slate-200">${escapeHtml(s.user_name)}</strong></p>
                             </div>
-                            <button onclick="viewCertificate(${s.id})" class="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs transition shadow-md shadow-amber-600/20 flex items-center gap-2">
-                                <span>🎓</span> Abrir Diploma (PDF)
+                            <button onclick="viewCertificate(${s.subscription_id || s.id})" class="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs transition shadow-md shadow-amber-600/20 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                <span>Abrir Diploma (PDF)</span>
                             </button>
                         </div>
                     `).join('');
@@ -1944,6 +2002,10 @@
 
         // VISUALIZAÇÃO DE CERTIFICADO EM MODAL
         async function viewCertificate(subOrCertId) {
+            if (!subOrCertId || subOrCertId === 'undefined') {
+                showToast('Inscrição não encontrada para emissão de certificado.', 'error');
+                return;
+            }
             try {
                 const res = await api(`/certificates/${subOrCertId}`);
                 const c = res.certificate;
@@ -1985,7 +2047,7 @@
                 resultEl.className = 'p-4 rounded-xl text-xs border bg-emerald-500/10 border-emerald-500/30 text-emerald-300 block space-y-1';
                 resultEl.innerHTML = `
                     <div class="font-bold flex items-center gap-1.5 text-emerald-400">
-                        <span>✓</span> CERTIFICADO AUTÊNTICO E REGISTRADO
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>CERTIFICADO AUTÊNTICO E REGISTRADO</span>
                     </div>
                     <p><strong>Participante:</strong> ${escapeHtml(res.certificate.participant_name)}</p>
                     <p><strong>Evento:</strong> ${escapeHtml(res.certificate.event_title)}</p>
@@ -1993,7 +2055,7 @@
                 `;
             } catch (err) {
                 resultEl.className = 'p-4 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-300 block';
-                resultEl.innerHTML = `<strong>✖ CÓDIGO INVÁLIDO:</strong> Certificado inexistente ou adulterado.`;
+                resultEl.innerHTML = `<strong class="flex items-center gap-1.5 text-rose-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span>CÓDIGO INVÁLIDO:</span></strong> Certificado inexistente ou adulterado.`;
             }
         }
 
@@ -2175,8 +2237,8 @@
                     <td class="px-6 py-3.5 text-slate-400 font-sans text-xs">${m.req}</td>
                     <td class="px-6 py-3.5">
                         ${m.can ? 
-                            '<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">PERMITIDO ✓</span>' : 
-                            '<span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20">BLOQUEADO ✖</span>'
+                            '<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 flex items-center gap-1 inline-flex"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>PERMITIDO</span></span>' : 
+                            '<span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20 flex items-center gap-1 inline-flex"><svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span>BLOQUEADO</span></span>'
                         }
                     </td>
                     <td class="px-6 py-3.5 text-right font-sans">
@@ -2252,22 +2314,22 @@
             const toast = document.getElementById('toast');
             let bgClass = 'bg-slate-900 border-slate-700 text-white';
             let barColor = 'bg-indigo-500';
-            let icon = 'ℹ️';
+            let iconSvg = '<svg class="w-5 h-5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
 
             if (type === 'success') {
                 bgClass = 'bg-slate-900/95 border-emerald-500/40 text-emerald-300';
                 barColor = 'bg-emerald-500';
-                icon = '✅';
+                iconSvg = '<svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             } else if (type === 'error') {
                 bgClass = 'bg-slate-900/95 border-rose-500/40 text-rose-300';
                 barColor = 'bg-rose-500';
-                icon = '❌';
+                iconSvg = '<svg class="w-5 h-5 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
             }
 
             toast.className = `fixed bottom-6 right-6 max-w-md p-4 rounded-2xl shadow-2xl z-50 text-xs sm:text-sm border backdrop-blur-md flex flex-col gap-2 transition-all duration-300 ${bgClass}`;
             toast.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <span class="text-base">${icon}</span>
+                    <span class="shrink-0">${iconSvg}</span>
                     <span class="font-medium">${escapeHtml(message)}</span>
                 </div>
                 <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
