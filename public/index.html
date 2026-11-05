@@ -920,6 +920,9 @@
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
                                 ${currentUser?.role === 'ADMIN' ? `
+                                    <button onclick="editUserNamePrompt(${u.id}, '${escapeHtml(u.name)}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                                        Editar
+                                    </button>
                                     <button onclick="promoteUserPrompt(${u.id}, '${u.role}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-medium transition">
                                         Papel
                                     </button>
@@ -962,6 +965,22 @@
                 loadUsers();
             } catch (err) {
                 showToast(err.data?.error || 'Erro ao alterar papel.', 'error');
+            }
+        }
+
+        async function editUserNamePrompt(userId, currentName) {
+            const newName = prompt(`Editar nome do usuário #${userId}:`, currentName);
+            if (!newName || newName.trim() === currentName) return;
+
+            try {
+                await api(`/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name: newName.trim() })
+                });
+                showToast('Nome do usuário atualizado com sucesso!', 'success');
+                loadUsers();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao atualizar nome.', 'error');
             }
         }
 
