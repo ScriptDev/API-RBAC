@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "node test_suite.js"
+    "test": "node test_suite.js",
+    "test:admin": "node test_suite.js admin",
+    "test:editor": "node test_suite.js editor",
+    "test:user": "node test_suite.js user",
+    "test:events": "node test_suite.js events",
+    "test:subs": "node test_suite.js subscriptions",
+    "test:certs": "node test_suite.js certificates"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

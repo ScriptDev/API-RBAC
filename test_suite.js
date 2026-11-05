@@ -41,14 +41,27 @@ function request(method, path, body = null, token = null) {
 }
 
 async function runTests() {
+    const filter = (process.argv[2] || '').toLowerCase().trim();
+
     console.log('====================================================');
     console.log('INICIANDO BATERIA DE TESTES DE INTEGRIDADE DA API RBAC');
+    if (filter) {
+        console.log(`🎯 FILTRO ATIVO: Testando apenas [${filter.toUpperCase()}]`);
+    } else {
+        console.log('🎯 MODO COMPLETO: Executando todas as 38 asserções da matriz');
+    }
     console.log('====================================================\n');
 
     let passed = 0;
     let failed = 0;
 
-    function assert(condition, message, details = '') {
+    function assert(condition, message, details = '', tags = ['all']) {
+        if (filter && filter !== 'all') {
+            const normalizedTags = tags.map(t => t.toLowerCase());
+            if (!normalizedTags.includes(filter)) {
+                return; // Pula este assert pois não pertence ao filtro solicitado
+            }
+        }
         if (condition) {
             console.log(`[PASS] ${message}`);
             passed++;
@@ -64,11 +77,11 @@ async function runTests() {
 
         // 1. Health check
         const health = await request('GET', '/health');
-        assert(health.status === 200 && health.body.status === 'UP', 'GET /health retorna 200 e status UP');
+        assert(health.status === 200 && health.body.status === 'UP', 'GET /health retorna 200 e status UP', '', ['health', 'infra']);
 
         // 2. Swagger docs
         const docs = await request('GET', '/api-docs/');
-        assert(docs.status === 200 || docs.status === 301, 'GET /api-docs/ disponível e respondendo');
+        assert(docs.status === 200 || docs.status === 301, 'GET /api-docs/ disponível e respondendo', '', ['docs', 'infra']);
 
         const timestamp = Date.now();
         const adminEmail = `admin_${timestamp}@eventos.edu.br`;
@@ -82,7 +95,7 @@ async function runTests() {
             email: adminEmail,
             password: 'AdminPassword123'
         });
-        assert(regAdmin.status === 201, 'POST /users/register cria usuário', regAdmin.body);
+        assert(regAdmin.status === 201, 'POST /users/register cria usuário', regAdmin.body, ['admin', 'users']);
 
         // Promover diretamente para ADMIN no banco para fins de teste
         const db = require('./src/config/db');
@@ -93,7 +106,7 @@ async function runTests() {
             email: adminEmail,
             password: 'AdminPassword123'
         });
-        assert(loginAdmin.status === 200 && loginAdmin.body.token, 'POST /users/login para ADMIN retorna 200 e JWT');
+        assert(loginAdmin.status === 200 && loginAdmin.body.token, 'POST /users/login para ADMIN retorna 200 e JWT', '', ['admin', 'users']);
         const tokenAdmin = loginAdmin.body.token;
         const adminId = loginAdmin.body.user.id;
 
@@ -104,7 +117,7 @@ async function runTests() {
             password: 'EditorPassword123',
             role: 'EDITOR'
         }, tokenAdmin);
-        assert(regEditor.status === 201 && regEditor.body.user.role === 'EDITOR', 'POST /users/register com token ADMIN cria role EDITOR');
+        assert(regEditor.status === 201 && regEditor.body.user.role === 'EDITOR', 'POST /users/register com token ADMIN cria role EDITOR', '', ['admin', 'editor', 'users']);
 
         const loginEditor = await request('POST', '/users/login', {
             email: editorEmail,
@@ -119,7 +132,7 @@ async function runTests() {
             email: user1Email,
             password: 'UserPassword123'
         });
-        assert(regUser1.status === 201 && regUser1.body.user.role === 'USER', 'POST /users/register público define role padrão USER');
+        assert(regUser1.status === 201 && regUser1.body.user.role === 'USER', 'POST /users/register público define role padrão USER', '', ['user', 'users']);
 
         const regUser2 = await request('POST', '/users/register', {
             name: 'Aluno Dois',
@@ -137,57 +150,57 @@ async function runTests() {
 
         // 6. Testar RBAC em GET /users
         const listUsersAnon = await request('GET', '/users');
-        assert(listUsersAnon.status === 401, 'GET /users anônimo retorna 401');
+        assert(listUsersAnon.status === 401, 'GET /users anônimo retorna 401', '', ['public', 'users']);
 
         const listUsersUser = await request('GET', '/users', null, tokenUser1);
-        assert(listUsersUser.status === 403, 'GET /users com perfil USER retorna 403 (Proibido)');
+        assert(listUsersUser.status === 403, 'GET /users com perfil USER retorna 403 (Proibido)', '', ['user', 'users']);
 
         const listUsersEditor = await request('GET', '/users', null, tokenEditor);
-        assert(listUsersEditor.status === 200, 'GET /users com perfil EDITOR retorna 200');
+        assert(listUsersEditor.status === 200, 'GET /users com perfil EDITOR retorna 200', '', ['editor', 'users']);
 
         const listUsersAdmin = await request('GET', '/users', null, tokenAdmin);
-        assert(listUsersAdmin.status === 200, 'GET /users com perfil ADMIN retorna 200');
+        assert(listUsersAdmin.status === 200, 'GET /users com perfil ADMIN retorna 200', '', ['admin', 'users']);
 
         // 7. Testar RBAC em PUT /users/:id
         // USER tentando editar outro USER
         const editOtherUser = await request('PUT', `/users/${user2Id}`, { name: 'Tentativa Hacker' }, tokenUser1);
-        assert(editOtherUser.status === 403, 'PUT /users/:id: USER não pode editar outro usuário (403)');
+        assert(editOtherUser.status === 403, 'PUT /users/:id: USER não pode editar outro usuário (403)', '', ['user', 'users']);
 
         // USER editando a si próprio
         const editSelf = await request('PUT', `/users/${user1Id}`, { name: 'Aluno Um Atualizado' }, tokenUser1);
-        assert(editSelf.status === 200 && editSelf.body.user.name === 'Aluno Um Atualizado', 'PUT /users/:id: USER pode editar seu próprio perfil (200)');
+        assert(editSelf.status === 200 && editSelf.body.user.name === 'Aluno Um Atualizado', 'PUT /users/:id: USER pode editar seu próprio perfil (200)', '', ['user', 'users']);
 
         // EDITOR editando conta USER
         const editUserByEditor = await request('PUT', `/users/${user2Id}`, { name: 'Aluno Dois Modificado por Editor' }, tokenEditor);
-        assert(editUserByEditor.status === 200, 'PUT /users/:id: EDITOR pode editar perfil USER (200)');
+        assert(editUserByEditor.status === 200, 'PUT /users/:id: EDITOR pode editar perfil USER (200)', '', ['editor', 'users']);
 
         // EDITOR tentando editar conta ADMIN
         const editAdminByEditor = await request('PUT', `/users/${adminId}`, { name: 'Hacked Admin' }, tokenEditor);
-        assert(editAdminByEditor.status === 403, 'PUT /users/:id: EDITOR não pode editar perfil ADMIN (403)');
+        assert(editAdminByEditor.status === 403, 'PUT /users/:id: EDITOR não pode editar perfil ADMIN (403)', '', ['editor', 'users']);
 
         // ADMIN editando qualquer conta
         const editByAdmin = await request('PUT', `/users/${editorId}`, { name: 'Editor Nome Atualizado por Admin' }, tokenAdmin);
-        assert(editByAdmin.status === 200, 'PUT /users/:id: ADMIN pode editar qualquer perfil (200)');
+        assert(editByAdmin.status === 200, 'PUT /users/:id: ADMIN pode editar qualquer perfil (200)', '', ['admin', 'users']);
 
         // 8. Testar RBAC em DELETE /users/:id
         const delByUser = await request('DELETE', `/users/${user2Id}`, null, tokenUser1);
-        assert(delByUser.status === 403, 'DELETE /users/:id com perfil USER retorna 403');
+        assert(delByUser.status === 403, 'DELETE /users/:id com perfil USER retorna 403', '', ['user', 'users']);
 
         const delByEditor = await request('DELETE', `/users/${user2Id}`, null, tokenEditor);
-        assert(delByEditor.status === 403, 'DELETE /users/:id com perfil EDITOR retorna 403');
+        assert(delByEditor.status === 403, 'DELETE /users/:id com perfil EDITOR retorna 403', '', ['editor', 'users']);
 
         // 9. Testar RBAC em /events
         // GET /events público
         const listEventsPublic = await request('GET', '/events');
-        assert(listEventsPublic.status === 200, 'GET /events público retorna 200');
+        assert(listEventsPublic.status === 200, 'GET /events público retorna 200', '', ['public', 'events']);
 
         // POST /events sem token
         const createEventAnon = await request('POST', '/events', { title: 'Hack Event', event_date: '2026-12-01' });
-        assert(createEventAnon.status === 401, 'POST /events anônimo retorna 401');
+        assert(createEventAnon.status === 401, 'POST /events anônimo retorna 401', '', ['public', 'events']);
 
         // POST /events com USER
         const createEventUser = await request('POST', '/events', { title: 'Hack Event', event_date: '2026-12-01' }, tokenUser1);
-        assert(createEventUser.status === 403, 'POST /events com perfil USER retorna 403');
+        assert(createEventUser.status === 403, 'POST /events com perfil USER retorna 403', '', ['user', 'events']);
 
         // POST /events com EDITOR
         const createEventEditor = await request('POST', '/events', {
@@ -197,86 +210,90 @@ async function runTests() {
             location: 'Laboratório 3',
             capacity: 2
         }, tokenEditor);
-        assert(createEventEditor.status === 201 && createEventEditor.body.event.id, 'POST /events com perfil EDITOR cria evento com sucesso (201)');
+        assert(createEventEditor.status === 201 && createEventEditor.body.event.id, 'POST /events com perfil EDITOR cria evento com sucesso (201)', '', ['editor', 'events']);
         const eventId = createEventEditor.body.event.id;
 
         // PUT /events/:id com USER
         const editEventUser = await request('PUT', `/events/${eventId}`, { title: 'Modificado por User' }, tokenUser1);
-        assert(editEventUser.status === 403, 'PUT /events/:id com perfil USER retorna 403');
+        assert(editEventUser.status === 403, 'PUT /events/:id com perfil USER retorna 403', '', ['user', 'events']);
 
         // PUT /events/:id com EDITOR
         const editEventEditor = await request('PUT', `/events/${eventId}`, { title: `Workshop de Node.js e RBAC Atualizado ${timestamp}` }, tokenEditor);
-        assert(editEventEditor.status === 200, 'PUT /events/:id com perfil EDITOR edita evento (200)');
+        assert(editEventEditor.status === 200, 'PUT /events/:id com perfil EDITOR edita evento (200)', '', ['editor', 'events']);
 
         // DELETE /events/:id com EDITOR
         const delEventEditor = await request('DELETE', `/events/${eventId}`, null, tokenEditor);
-        assert(delEventEditor.status === 403, 'DELETE /events/:id com perfil EDITOR retorna 403 (Apenas ADMIN)');
+        assert(delEventEditor.status === 403, 'DELETE /events/:id com perfil EDITOR retorna 403 (Apenas ADMIN)', '', ['editor', 'events']);
 
         // 10. Testar Inscrições (/subscriptions)
         // Inscrição anônima
         const subAnon = await request('POST', '/subscriptions', { event_id: eventId });
-        assert(subAnon.status === 401, 'POST /subscriptions anônimo retorna 401');
+        assert(subAnon.status === 401, 'POST /subscriptions anônimo retorna 401', '', ['public', 'subscriptions', 'subs']);
 
         // Inscrição USER 1 no evento
         const subUser1 = await request('POST', '/subscriptions', { event_id: eventId }, tokenUser1);
-        assert(subUser1.status === 201 && subUser1.body.subscription.id, 'POST /subscriptions com USER inscreve com sucesso (201)');
+        assert(subUser1.status === 201 && subUser1.body.subscription.id, 'POST /subscriptions com USER inscreve com sucesso (201)', '', ['user', 'subscriptions', 'subs']);
         const sub1Id = subUser1.body.subscription.id;
 
         // Duplicidade de inscrição
         const subUser1Dup = await request('POST', '/subscriptions', { event_id: eventId }, tokenUser1);
-        assert(subUser1Dup.status === 409, 'POST /subscriptions duplicado retorna 409 Conflito');
+        assert(subUser1Dup.status === 409, 'POST /subscriptions duplicado retorna 409 Conflito', '', ['user', 'subscriptions', 'subs']);
 
         // Inscrição USER 2 no evento (atingindo a capacidade = 2)
         const subUser2 = await request('POST', '/subscriptions', { event_id: eventId }, tokenUser2);
-        assert(subUser2.status === 201, 'POST /subscriptions USER 2 inscreve com sucesso (201)');
+        assert(subUser2.status === 201, 'POST /subscriptions USER 2 inscreve com sucesso (201)', '', ['user', 'subscriptions', 'subs']);
 
         // Inscrição extra em evento lotado
         const subUserExtra = await request('POST', '/subscriptions', { event_id: eventId }, tokenAdmin);
-        assert(subUserExtra.status === 400, 'POST /subscriptions em evento com capacidade esgotada retorna 400');
+        assert(subUserExtra.status === 400, 'POST /subscriptions em evento com capacidade esgotada retorna 400', '', ['subscriptions', 'subs', 'admin']);
 
         // 11. Testar Segregação RBAC em GET /subscriptions
         const listSubUser1 = await request('GET', '/subscriptions', null, tokenUser1);
         assert(
             listSubUser1.status === 200 &&
             listSubUser1.body.data.every(s => s.user_id === user1Id),
-            'GET /subscriptions com USER retorna estritamente apenas as suas próprias inscrições'
+            'GET /subscriptions com USER retorna estritamente apenas as suas próprias inscrições',
+            '',
+            ['user', 'subscriptions', 'subs']
         );
 
         const listSubAdmin = await request('GET', '/subscriptions', null, tokenAdmin);
         assert(
             listSubAdmin.status === 200 && listSubAdmin.body.data.length >= 2,
-            'GET /subscriptions com ADMIN retorna todas as inscrições do sistema'
+            'GET /subscriptions com ADMIN retorna todas as inscrições do sistema',
+            '',
+            ['admin', 'subscriptions', 'subs']
         );
 
         // 12. Testar Certificados (/certificates/:id)
         // Acesso anônimo a certificado
         const certAnon = await request('GET', `/certificates/${sub1Id}`);
-        assert(certAnon.status === 401, 'GET /certificates/:id anônimo retorna 401');
+        assert(certAnon.status === 401, 'GET /certificates/:id anônimo retorna 401', '', ['public', 'certificates', 'certs']);
 
         // USER 2 tentando acessar o certificado da inscrição de USER 1
         const certOtherUser = await request('GET', `/certificates/${sub1Id}`, null, tokenUser2);
-        assert(certOtherUser.status === 403, 'GET /certificates/:id: USER não pode acessar certificado de outro participante (403)');
+        assert(certOtherUser.status === 403, 'GET /certificates/:id: USER não pode acessar certificado de outro participante (403)', '', ['user', 'certificates', 'certs']);
 
         // USER 1 acessando o seu próprio certificado
         const certOwnUser = await request('GET', `/certificates/${sub1Id}`, null, tokenUser1);
-        assert(certOwnUser.status === 200 && certOwnUser.body.certificate.code, 'GET /certificates/:id: USER acessa seu próprio certificado com sucesso (200)');
+        assert(certOwnUser.status === 200 && certOwnUser.body.certificate.code, 'GET /certificates/:id: USER acessa seu próprio certificado com sucesso (200)', '', ['user', 'certificates', 'certs']);
         const certCode = certOwnUser.body.certificate.code;
 
         // ADMIN acessando qualquer certificado
         const certByAdmin = await request('GET', `/certificates/${sub1Id}`, null, tokenAdmin);
-        assert(certByAdmin.status === 200, 'GET /certificates/:id: ADMIN pode acessar qualquer certificado (200)');
+        assert(certByAdmin.status === 200, 'GET /certificates/:id: ADMIN pode acessar qualquer certificado (200)', '', ['admin', 'certificates', 'certs']);
 
         // Validação pública de autenticidade do certificado
         const validatePub = await request('GET', `/certificates/validate/${certCode}`);
-        assert(validatePub.status === 200 && validatePub.body.valid === true, 'GET /certificates/validate/:code valida autenticidade publicamente');
+        assert(validatePub.status === 200 && validatePub.body.valid === true, 'GET /certificates/validate/:code valida autenticidade publicamente', '', ['public', 'certificates', 'certs']);
 
         // 13. Limpeza / DELETE /events/:id com ADMIN
         const delEventAdmin = await request('DELETE', `/events/${eventId}`, null, tokenAdmin);
-        assert(delEventAdmin.status === 200, 'DELETE /events/:id com perfil ADMIN deleta evento com sucesso (200)');
+        assert(delEventAdmin.status === 200, 'DELETE /events/:id com perfil ADMIN deleta evento com sucesso (200)', '', ['admin', 'events']);
 
         // DELETE /users/:id com ADMIN
         const delUserAdmin = await request('DELETE', `/users/${user2Id}`, null, tokenAdmin);
-        assert(delUserAdmin.status === 200, 'DELETE /users/:id com perfil ADMIN deleta usuário com sucesso (200)');
+        assert(delUserAdmin.status === 200, 'DELETE /users/:id com perfil ADMIN deleta usuário com sucesso (200)', '', ['admin', 'users']);
 
         console.log('\n====================================================');
         console.log(`TESTES FINALIZADOS: ${passed} PASSOU | ${failed} FALHOU`);

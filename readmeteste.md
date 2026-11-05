@@ -175,10 +175,18 @@ O script criará o tipo `user_role` (ADMIN, EDITOR, USER), as tabelas (`users`, 
 Para validar a integridade estrutural, a conformidade da Clean Architecture e a blindagem contra regressão de código, o projeto conta com uma suíte de testes ponta a ponta automatizada (`test_suite.js`).
 
 ### 3.1 Como Executar
-Em um terminal, execute:
-```powershell
-npm test
-```
+
+Você pode executar a suíte completa de uma vez ou testar **separadamente por papel ou entidade**:
+
+| Comando | Escopo Testado | Quantidade de Asserções |
+| :--- | :--- | :---: |
+| **`npm test`** | **Modo Completo** (Toda a matriz RBAC e regras de negócio) | **38 asserções** |
+| **`npm run test:user`** | **Apenas Aluno (`USER`)** (Inscrições, limite, duplicidade, certificado próprio) | **13 asserções** |
+| **`npm run test:admin`** | **Apenas Administrador (`ADMIN`)** (Poder pleno, auditoria, exclusão em cascata) | **10 asserções** |
+| **`npm run test:editor`** | **Apenas Organizador (`EDITOR`)** (Criação e edição de eventos, gestão de alunos) | **7 asserções** |
+| **`npm run test:events`** | **Apenas Entidade Eventos** (Leitura pública, criação/edição por editor, exclusão por admin) | **8 asserções** |
+| **`npm run test:subs`** | **Apenas Entidade Inscrições** (Concorrência, lotação de vagas, duplicidade e isolamento) | **7 asserções** |
+| **`npm run test:certs`** | **Apenas Entidade Certificados** (Geração de hash, isolamento e validação pública) | **5 asserções** |
 
 ### 3.2 O que é Validado Automaticamente
 A suíte roda em uma porta isolada (`3099`) e executa **38 asserções rigorosas**, cobrindo:
