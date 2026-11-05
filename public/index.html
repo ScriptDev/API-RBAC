@@ -1559,12 +1559,6 @@
             }
         }
 
-                document.getElementById('certificate-modal').classList.remove('hidden');
-            } catch (err) {
-                showToast(err.data?.error || 'Não foi possível carregar o certificado. Permissão negada.', 'error');
-            }
-        }
-
         function closeCertModal() {
             document.getElementById('certificate-modal').classList.add('hidden');
         }
