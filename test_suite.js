@@ -295,6 +295,9 @@ async function runTests() {
         const delUserAdmin = await request('DELETE', `/users/${user2Id}`, null, tokenAdmin);
         assert(delUserAdmin.status === 200, 'DELETE /users/:id com perfil ADMIN deleta usuário com sucesso (200)', '', ['admin', 'users']);
 
+        // Teardown / Sanitização: Remove os usuários temporários restantes do teste para não poluir o banco
+        await db.query('DELETE FROM users WHERE email IN ($1, $2, $3)', [adminEmail, editorEmail, user1Email]);
+
         console.log('\n====================================================');
         console.log(`TESTES FINALIZADOS: ${passed} PASSOU | ${failed} FALHOU`);
         console.log('====================================================');
