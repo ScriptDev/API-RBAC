@@ -579,6 +579,56 @@
     </div>
 
     <!-- ============================================================ -->
+    <!-- MODAL DE PARTICIPANTES, PRESENÇA E CONCLUSÃO DE EVENTO -->
+    <!-- ============================================================ -->
+    <div id="event-attendance-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700/90 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[90vh] flex flex-col">
+            <button onclick="closeEventAttendanceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold transition">&times;</button>
+
+            <!-- CABEÇALHO DO MODAL -->
+            <div class="space-y-1.5 border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-2 flex-wrap" id="attendance-modal-badges"></div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-white" id="attendance-modal-title">Participantes & Homologação de Presença</h3>
+                <p class="text-xs text-slate-400" id="attendance-modal-meta">Gerenciamento de lista de presença e certificação acadêmica</p>
+            </div>
+
+            <!-- RESUMO RÁPIDO DO EVENTO -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+                <div>
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">Data / Horário:</span>
+                    <span class="text-slate-200 font-medium" id="attendance-summary-date">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">Carga Horária:</span>
+                    <span class="text-indigo-300 font-bold" id="attendance-summary-workload">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">Vagas Ocupadas (Alunos):</span>
+                    <span class="text-emerald-300 font-bold" id="attendance-summary-slots">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">Staff Assíduo:</span>
+                    <span class="text-amber-300 font-semibold" id="attendance-summary-staff">Admin & Editor</span>
+                </div>
+            </div>
+
+            <!-- BARRA DE AÇÕES EM LOTE (MARCAR TODOS) -->
+            <div class="flex items-center justify-between gap-3 text-xs">
+                <span class="font-bold text-slate-300 uppercase tracking-wider text-[11px]" id="attendance-count-header">Participantes Inscritos:</span>
+                <div class="flex items-center gap-2" id="attendance-bulk-actions"></div>
+            </div>
+
+            <!-- LISTA ROLÁVEL DE PARTICIPANTES -->
+            <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar min-h-[220px] max-h-[360px]" id="attendance-participants-list">
+                <div class="py-12 text-center text-slate-500">Carregando lista de inscritos...</div>
+            </div>
+
+            <!-- RODAPÉ COM AÇÕES RBAC -->
+            <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3" id="attendance-modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- JAVASCRIPT DE INTEGRAÇÃO & COMPORTAMENTO DO SISTEMA -->
     <!-- ============================================================ -->
     <script>
@@ -1028,18 +1078,22 @@
                             </div>
 
                             <!-- CONTROLES DO ADMIN E DO EDITOR -->
-                            <div class="flex items-center gap-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
                                 ${currentUser?.role === 'ADMIN' ? (
                                     e.status === 'COMPLETED' ? `
-                                        <button onclick="toggleEventStatus(${e.id}, 'OPEN')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition font-semibold" title="Reabrir Evento Acadêmico">
-                                            🔄 Reabrir
+                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition font-semibold flex items-center gap-1" title="Visualizar Lista de Presença e Status">
+                                            <span>🔄</span> Presença (Concluído)
                                         </button>
                                     ` : `
-                                        <button onclick="toggleEventStatus(${e.id}, 'COMPLETED')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20" title="Marcar como Concluído e liberar emissão de certificações">
-                                            🏁 Concluir
+                                        <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1" title="Ver Participantes, Confirmar Presença e Concluir Evento">
+                                            <span>🏁</span> Concluir Evento
                                         </button>
                                     `
-                                ) : ''}
+                                ) : (currentUser?.role === 'EDITOR' ? `
+                                    <button onclick="openEventAttendanceModal(${e.id})" class="px-3 py-1.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1" title="Confirmar Presença dos Participantes">
+                                        <span>👥</span> Confirmar Presença
+                                    </button>
+                                ` : '')}
 
                                 ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? `
                                     <button onclick="openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Editar Evento">
@@ -1170,11 +1224,17 @@
                 `;
             }
 
-            // Ação Exclusiva de Concluir / Reabrir Evento para ADMIN
+            // Ações de Homologação de Presença e Conclusão de Evento
             if (currentUser?.role === 'ADMIN') {
                 actionsHtml += `
-                    <button onclick="toggleEventStatus(${e.id}, '${e.status === 'COMPLETED' ? 'OPEN' : 'COMPLETED'}')" class="px-4 py-2.5 ${e.status === 'COMPLETED' ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/20'} rounded-xl text-xs transition flex items-center gap-1.5">
-                        <span>${e.status === 'COMPLETED' ? '🔄' : '🏁'}</span> ${e.status === 'COMPLETED' ? 'Reabrir Evento' : 'Concluir Evento'}
+                    <button onclick="closeEventDetailsModal(); openEventAttendanceModal(${e.id})" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+                        <span>📋</span> Presença & Conclusão
+                    </button>
+                `;
+            } else if (currentUser?.role === 'EDITOR') {
+                actionsHtml += `
+                    <button onclick="closeEventDetailsModal(); openEventAttendanceModal(${e.id})" class="px-4 py-2.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+                        <span>👥</span> Confirmar Presença dos Inscritos
                     </button>
                 `;
             }
@@ -1339,6 +1399,216 @@
                 showToast(res.message, 'success');
                 closeEventDetailsModal();
                 loadEvents();
+                loadSubscriptions();
+            } catch (err) {
+                showToast(err.data?.error || 'Apenas o Administrador Geral tem poder para concluir eventos.', 'error');
+            }
+        }
+
+        // ============================================================
+        // MODAL DE HOMOLOGAÇÃO DE PRESENÇA E PARTICIPANTES
+        // ============================================================
+        let currentAttendanceEventId = null;
+
+        async function openEventAttendanceModal(eventId) {
+            currentAttendanceEventId = eventId;
+            const modal = document.getElementById('event-attendance-modal');
+            modal.classList.remove('hidden');
+
+            const e = allLoadedEvents.find(ev => ev.id === eventId);
+            if (!e) return;
+
+            const isCompleted = e.status === 'COMPLETED';
+            const badgesEl = document.getElementById('attendance-modal-badges');
+            badgesEl.innerHTML = `
+                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${isCompleted ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                    ${isCompleted ? '🏁 Evento Concluído' : '🟢 Evento Aberto / Em Andamento'}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800">ID #${e.id}</span>
+            `;
+
+            document.getElementById('attendance-modal-title').textContent = e.title;
+            document.getElementById('attendance-summary-date').textContent = new Date(e.event_date).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            document.getElementById('attendance-summary-workload').textContent = `${e.workload_hours || 20} Horas`;
+            document.getElementById('attendance-summary-slots').textContent = `${e.total_subscriptions || 0} / ${e.capacity} alunos`;
+
+            await loadEventParticipants(eventId);
+        }
+
+        function closeEventAttendanceModal() {
+            document.getElementById('event-attendance-modal').classList.add('hidden');
+            currentAttendanceEventId = null;
+        }
+
+        async function loadEventParticipants(eventId) {
+            const listEl = document.getElementById('attendance-participants-list');
+            const bulkEl = document.getElementById('attendance-bulk-actions');
+            const footerEl = document.getElementById('attendance-modal-footer');
+            const e = allLoadedEvents.find(ev => ev.id === eventId);
+            if (!e) return;
+
+            listEl.innerHTML = '<div class="py-12 text-center text-slate-500">Buscando participantes do evento...</div>';
+
+            try {
+                const res = await api(`/subscriptions?event_id=${eventId}&limit=100`);
+                const participants = res.data || [];
+
+                document.getElementById('attendance-count-header').textContent = `Participantes Inscritos (${participants.length}):`;
+
+                if (participants.length === 0) {
+                    listEl.innerHTML = '<div class="py-12 text-center text-slate-500">Nenhum participante inscrito neste evento até o momento.</div>';
+                    bulkEl.innerHTML = '';
+                } else {
+                    const studentParticipants = participants.filter(p => p.user_role === 'USER');
+
+                    bulkEl.innerHTML = ['ADMIN', 'EDITOR'].includes(currentUser?.role) && studentParticipants.length > 0 ? `
+                        <button onclick="markAllAttendance(${eventId}, true)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1">
+                            <span>✓</span> Confirmar Todos os Alunos
+                        </button>
+                    ` : '';
+
+                    listEl.innerHTML = participants.map(p => {
+                        const hasAttended = !!p.attended;
+                        const canEditAttendance = ['ADMIN', 'EDITOR'].includes(currentUser?.role);
+
+                        let roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">🎓 Aluno</span>';
+                        if (p.user_role === 'ADMIN') {
+                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20">👑 Admin (Staff Assíduo)</span>';
+                        } else if (p.user_role === 'EDITOR') {
+                            roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">✍️ Editor (Coordenação)</span>';
+                        }
+
+                        return `
+                            <div class="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 flex items-center justify-center">
+                                        ${escapeHtml((p.user_name || 'U').substring(0, 2).toUpperCase())}
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h5 class="text-sm font-bold text-white">${escapeHtml(p.user_name)}</h5>
+                                            ${roleBadge}
+                                            ${hasAttended ? 
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ Presença Confirmada</span>' : 
+                                                '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⏳ Presença Pendente</span>'
+                                            }
+                                        </div>
+                                        <p class="text-xs text-slate-400">${escapeHtml(p.user_email)}</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    ${canEditAttendance ? (hasAttended ? `
+                                        <button onclick="toggleAttendanceInModal(${p.subscription_id}, false, ${eventId})" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-rose-500/10 hover:text-rose-300 text-slate-400 border border-slate-700 transition" title="Desmarcar presença">
+                                            Desmarcar ✖
+                                        </button>
+                                    ` : `
+                                        <button onclick="toggleAttendanceInModal(${p.subscription_id}, true, ${eventId})" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-md shadow-emerald-600/20 flex items-center gap-1">
+                                            <span>✓</span> Confirmar Presença
+                                        </button>
+                                    `) : ''}
+
+                                    ${(e.status === 'COMPLETED' && hasAttended) ? `
+                                        <button onclick="viewCertificate(${p.subscription_id})" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition">
+                                            📜 Diploma
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // Renderiza Rodapé do Modal conforme Papel RBAC
+                const isCompleted = e.status === 'COMPLETED';
+                if (currentUser?.role === 'ADMIN') {
+                    footerEl.innerHTML = `
+                        <div class="text-xs text-slate-400">
+                            <p class="font-medium text-slate-300">💡 Gestão Geral de Certificação (Admin):</p>
+                            <p class="text-[11px] text-slate-400">Ao concluir o evento, os diplomas são emitidos para todos com presença confirmada.</p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <button onclick="closeEventAttendanceModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition">
+                                Fechar
+                            </button>
+                            ${isCompleted ? `
+                                <button onclick="toggleEventStatusFromModal(${eventId}, 'OPEN')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>🔄</span> Reabrir Evento
+                                </button>
+                            ` : `
+                                <button onclick="toggleEventStatusFromModal(${eventId}, 'COMPLETED')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5">
+                                    <span>🏁</span> Concluir Evento e Liberar Certificados
+                                </button>
+                            `}
+                        </div>
+                    `;
+                } else if (currentUser?.role === 'EDITOR') {
+                    footerEl.innerHTML = `
+                        <div class="text-xs text-slate-400">
+                            <p class="font-medium text-amber-400">✍️ Homologação Editorial (Editor):</p>
+                            <p class="text-[11px] text-slate-400">Você pode confirmar e homologar presenças. A conclusão do evento é prerrogativa do Administrador.</p>
+                        </div>
+                        <button onclick="closeEventAttendanceModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium transition">
+                            Fechar Lista
+                        </button>
+                    `;
+                } else {
+                    footerEl.innerHTML = `
+                        <button onclick="closeEventAttendanceModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium transition">
+                            Fechar
+                        </button>
+                    `;
+                }
+
+            } catch (err) {
+                listEl.innerHTML = '<div class="py-12 text-center text-rose-400">Erro ao carregar lista de participantes.</div>';
+            }
+        }
+
+        async function toggleAttendanceInModal(subId, attended, eventId) {
+            try {
+                const res = await api(`/subscriptions/${subId}/attendance`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ attended })
+                });
+                showToast(res.message, 'success');
+                await loadEventParticipants(eventId);
+                loadEvents();
+                loadSubscriptions();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao alterar presença.', 'error');
+            }
+        }
+
+        async function markAllAttendance(eventId, attended) {
+            try {
+                const res = await api(`/subscriptions?event_id=${eventId}&limit=100`);
+                const participants = (res.data || []).filter(p => p.user_role === 'USER' && p.attended !== attended);
+                
+                for (const p of participants) {
+                    await api(`/subscriptions/${p.subscription_id}/attendance`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ attended })
+                    });
+                }
+                showToast('Presença atualizada com sucesso para todos os alunos!', 'success');
+                await loadEventParticipants(eventId);
+                loadEvents();
+                loadSubscriptions();
+            } catch (err) {
+                showToast(err.data?.error || 'Erro ao homologar presenças em lote.', 'error');
+            }
+        }
+
+        async function toggleEventStatusFromModal(eventId, newStatus) {
+            try {
+                const res = await api(`/events/${eventId}/status`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status: newStatus })
+                });
+                showToast(res.message, 'success');
+                await loadEvents();
+                await openEventAttendanceModal(eventId);
                 loadSubscriptions();
             } catch (err) {
                 showToast(err.data?.error || 'Apenas o Administrador Geral tem poder para concluir eventos.', 'error');

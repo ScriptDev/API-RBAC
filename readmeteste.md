@@ -526,6 +526,23 @@ O simples ato de se inscrever em um evento acadêmico **NÃO garante a obtençã
 
 ---
 
+### 8.3 Homologação Contextual de Participantes e Regra de Staff (Admin/Editor)
+
+1. **Modal de Homologação de Presença & Participantes:**
+   - Ao clicar em **`🏁 Concluir Evento`** (Admin) ou **`👥 Confirmar Presença`** (Editor), abre-se a lista contextualizada com todos os inscritos naquele evento específico.
+   - Cada participante exibe: Nome, E-mail, Matrícula/Papel e o botão interativo para confirmar ou desmarcar presença com 1 clique (`PATCH /subscriptions/:id/attendance`).
+   - Há também o botão em lote **`✓ Confirmar Todos os Alunos`**.
+
+2. **Segregação de Poderes no Fechamento do Evento:**
+   - **Administrador:** No rodapé da lista de presença, possui o botão exclusivo **`🏁 Concluir Evento e Liberar Certificados`** (`PATCH /events/:id/status`), que finaliza o evento e habilita a emissão dos diplomas dos alunos presentes.
+   - **Editor:** Possui autorização plena para homologar presenças dos alunos, mas **não possui o botão de conclusão do evento** (prerrogativa exclusiva do Administrador).
+
+3. **Inscrição Assídua de Staff sem Ocupação de Vagas:**
+   - Administrador e Coordenador/Editor constam assiduamente inscritos em todos os eventos acadêmicos para fins de gestão, docência e organização.
+   - **Regra de Ouro da Capacidade:** A contagem de vagas ocupadas (`total_subscriptions`) e vagas restantes (`available_slots`) é calculada estritamente sobre os **alunos** (`role = 'USER'`). A inscrição do Staff não consome vagas de alunos.
+
+---
+
 ## 9. Protocolo Pós-Apresentação: Sanitização de Dados e Limpeza
 
 > [!CAUTION]

@@ -19,6 +19,14 @@ async function initSchema() {
             ALTER TABLE events ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'OPEN';
             ALTER TABLE events ADD COLUMN IF NOT EXISTS workload_hours INTEGER DEFAULT 20;
             ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS attended BOOLEAN DEFAULT FALSE;
+
+            -- Inscrição assídua automática de Admin e Editor em todos os eventos existentes
+            INSERT INTO subscriptions (user_id, event_id, attended)
+            SELECT u.id, e.id, true
+            FROM users u
+            CROSS JOIN events e
+            WHERE u.role IN ('ADMIN', 'EDITOR')
+            ON CONFLICT (user_id, event_id) DO NOTHING;
         `);
     } catch (_) {}
 }

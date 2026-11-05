@@ -24,12 +24,14 @@ exports.list = async (req, res) => {
                 COALESCE(e.workload_hours, 20)::int as workload_hours,
                 e.created_by,
                 u.name as organizer_name,
-                COUNT(s.id)::int as total_subscriptions,
-                GREATEST(0, e.capacity - COUNT(s.id)::int) as available_slots,
+                COUNT(CASE WHEN sub_user.role = 'USER' THEN s.id END)::int as total_subscriptions,
+                GREATEST(0, e.capacity - COUNT(CASE WHEN sub_user.role = 'USER' THEN s.id END)::int) as available_slots,
+                COUNT(s.id)::int as total_participants,
                 e.created_at
             FROM events e
             LEFT JOIN users u ON e.created_by = u.id
             LEFT JOIN subscriptions s ON e.id = s.event_id
+            LEFT JOIN users sub_user ON s.user_id = sub_user.id
             WHERE 1=1
         `;
 
@@ -103,12 +105,14 @@ exports.getById = async (req, res) => {
                 COALESCE(e.workload_hours, 20)::int as workload_hours,
                 e.created_by,
                 u.name as organizer_name,
-                COUNT(s.id)::int as total_subscriptions,
-                GREATEST(0, e.capacity - COUNT(s.id)::int) as available_slots,
+                COUNT(CASE WHEN sub_user.role = 'USER' THEN s.id END)::int as total_subscriptions,
+                GREATEST(0, e.capacity - COUNT(CASE WHEN sub_user.role = 'USER' THEN s.id END)::int) as available_slots,
+                COUNT(s.id)::int as total_participants,
                 e.created_at
             FROM events e
             LEFT JOIN users u ON e.created_by = u.id
             LEFT JOIN subscriptions s ON e.id = s.event_id
+            LEFT JOIN users sub_user ON s.user_id = sub_user.id
             WHERE e.id = $1
             GROUP BY e.id, u.name
         `;
@@ -154,9 +158,22 @@ exports.create = async (req, res) => {
             [title.trim(), description || null, parsedDate, location || null, eventCapacity, req.user.id]
         );
 
+        const newEvent = result.rows[0];
+
+        // [Regra RBAC]: Admin e Editor são inscritos assiduamente em todos os eventos automaticamente (Staff sem consumir vagas)
+        try {
+            await db.query(`
+                INSERT INTO subscriptions (user_id, event_id, attended)
+                SELECT u.id, $1, true
+                FROM users u
+                WHERE u.role IN ('ADMIN', 'EDITOR')
+                ON CONFLICT (user_id, event_id) DO NOTHING
+            `, [newEvent.id]);
+        } catch (_) {}
+
         res.status(201).json({
             message: 'Evento acadêmico criado com sucesso!',
-            event: result.rows[0]
+            event: newEvent
         });
     } catch (error) {
         console.error('[EventController.create] Erro:', error);

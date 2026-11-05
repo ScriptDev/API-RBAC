@@ -42,8 +42,17 @@ exports.create = async (req, res) => {
             });
         }
 
-        // 3. Verifica se a capacidade foi excedida
-        if (event.capacity && event.current_subscriptions >= event.capacity) {
+        // 3. Verifica se a capacidade foi excedida considerando apenas inscrições de alunos (role = 'USER')
+        const studentCountRes = await db.query(
+            `SELECT COUNT(s.id)::int as count 
+             FROM subscriptions s 
+             JOIN users u ON s.user_id = u.id 
+             WHERE s.event_id = $1 AND u.role = 'USER'`,
+            [event_id]
+        );
+        const studentCount = studentCountRes.rows[0].count;
+
+        if (event.capacity && studentCount >= event.capacity) {
             return res.status(400).json({
                 error: 'Inscrições encerradas. A capacidade máxima do evento foi atingida.'
             });
@@ -112,6 +121,7 @@ exports.list = async (req, res) => {
                 u.id as user_id,
                 u.name as user_name,
                 u.email as user_email,
+                u.role as user_role,
                 e.id as event_id,
                 e.title as event_title,
                 e.event_date,

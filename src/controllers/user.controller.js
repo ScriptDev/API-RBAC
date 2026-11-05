@@ -229,6 +229,16 @@ exports.setupDemoAccounts = async (req, res) => {
             }
         }
 
+        // 6. [Regra de Negócio]: Admin e Editor assiduamente inscritos em todos os eventos (Staff / Coordenação sem consumir vagas)
+        await db.query(`
+            INSERT INTO subscriptions (user_id, event_id, attended)
+            SELECT u.id, e.id, true
+            FROM users u
+            CROSS JOIN events e
+            WHERE u.role IN ('ADMIN', 'EDITOR')
+            ON CONFLICT (user_id, event_id) DO NOTHING;
+        `);
+
         res.json({ message: 'Ambiente de demonstração e eventos de teste preparados com sucesso!' });
     } catch (err) {
         console.error('[setupDemoAccounts] Erro:', err);
