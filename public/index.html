@@ -134,12 +134,68 @@
                 </div>
             </div>
 
+            <!-- CARDS DE MÉTRICAS EXECUTIVAS (KPIS ACADÊMICOS) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-indigo-500/30 transition shadow-lg">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-xl">
+                        📅
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Eventos Ativos</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold text-white" id="kpi-total-events">3</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Catálogo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-emerald-500/30 transition shadow-lg">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl">
+                        👥
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Inscrições Discentes</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold text-white" id="kpi-total-subs">--</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-bold">Alunos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-amber-500/30 transition shadow-lg">
+                    <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl">
+                        🏆
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Diplomas Emitidos</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold text-white" id="kpi-total-certs">--</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">Homologados</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 border border-slate-800/90 p-4 rounded-2xl flex items-center gap-3.5 hover:border-violet-500/30 transition shadow-lg">
+                    <div class="w-11 h-11 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center justify-center text-xl">
+                        ⏱️
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Carga Horária Média</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold text-white">20h</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20 font-bold">Ativ. Compl.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- BARRA DE PESQUISA & AÇÕES -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-800 shadow-md">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <div class="relative w-full sm:w-96">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">🔍</span>
-                        <input type="text" id="event-search" oninput="debounceSearch()" placeholder="Buscar evento por título ou tema..." class="w-full bg-slate-950/80 border border-slate-700/80 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition placeholder:text-slate-500">
+                        <input type="text" id="event-search" oninput="debounceSearch()" placeholder="Buscar evento por título ou tema..." class="w-full bg-slate-950/80 border border-slate-700/80 pl-10 pr-9 py-2.5 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition placeholder:text-slate-500">
+                        <button id="btn-clear-search" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white text-xs font-bold transition" title="Limpar busca">&times;</button>
                     </div>
                     <button onclick="loadEvents()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition font-medium">Atualizar</button>
                 </div>
@@ -345,6 +401,43 @@
         </section>
 
     </main>
+
+    <!-- ============================================================ -->
+    <!-- RODAPÉ INSTITUCIONAL PROFISSIONAL -->
+    <!-- ============================================================ -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/70 backdrop-blur-md text-slate-400 py-8 px-4 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xl shadow-inner">
+                    🎓
+                </div>
+                <div>
+                    <p class="text-white font-bold text-sm">Centro Universitário Ateneu</p>
+                    <p class="text-slate-500 text-[11px]">Sistema Integrado de Gestão Acadêmica, RBAC & Certificação Digital</p>
+                </div>
+            </div>
+
+            <!-- BADGES DE ARQUITETURA E SEGURANÇA -->
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🛡️ DevSecOps Ready</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🏛️ Clean Architecture</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">🔐 JWT + RBAC Strict</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">📜 SHA-256 Validated</span>
+            </div>
+
+            <!-- ASSINATURA TÉCNICA E LINKS -->
+            <div class="text-center md:text-right space-y-1">
+                <p class="text-slate-300 font-medium">Desenvolvido por <strong class="text-indigo-400">Samuel Mendes Cardoso</strong></p>
+                <div class="flex items-center justify-center md:justify-end gap-3 text-slate-500 text-[11px]">
+                    <a href="/api-docs" target="_blank" class="hover:text-indigo-400 transition">Swagger Docs</a>
+                    <span>•</span>
+                    <a href="/health" target="_blank" class="hover:text-emerald-400 transition">API Health</a>
+                    <span>•</span>
+                    <a href="https://github.com/ScriptDev/API-RBAC" target="_blank" class="hover:text-white transition">GitHub Repo</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- ============================================================ -->
     <!-- MODAL DE AUTENTICAÇÃO (LOGIN & CADASTRO) -->
@@ -956,6 +1049,20 @@
                     }
                 }
 
+                // Atualiza Cards de Métricas (KPIs Executivos)
+                const kpiEvents = document.getElementById('kpi-total-events');
+                const kpiSubs = document.getElementById('kpi-total-subs');
+                const kpiCerts = document.getElementById('kpi-total-certs');
+                if (kpiEvents) kpiEvents.textContent = allLoadedEvents.length;
+                if (kpiSubs) {
+                    const totalStudentSubs = allLoadedEvents.reduce((acc, ev) => acc + (ev.total_subscriptions || 0), 0);
+                    kpiSubs.textContent = totalStudentSubs;
+                }
+                if (kpiCerts) {
+                    const completedCount = allLoadedEvents.filter(ev => ev.status === 'COMPLETED').length;
+                    kpiCerts.textContent = completedCount;
+                }
+
                 renderEvents();
                 if (currentEventViewMode === 'calendar') {
                     renderCalendar();
@@ -1012,10 +1119,10 @@
                                     '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">🎓 Concluído • Você Participou</span>' : 
                                     '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>'
                                 ) : (userSub ? 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">🟢 Aberto • Inscrito ✓</span>' : 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>Inscrito ✓</span>' : 
                                     (isFull ? 
                                         '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">🔴 Esgotado</span>' : 
-                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">🟢 Aberto / Futuro</span>'
+                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span></span>Inscrições Abertas</span>'
                                     )
                                 )}
                                 <span class="text-xs text-slate-400 font-mono">ID #${e.id}</span>
@@ -2124,24 +2231,49 @@
 
         function debounceSearch() {
             clearTimeout(searchTimeout);
+            const val = (document.getElementById('event-search').value || '').trim();
+            const btnClear = document.getElementById('btn-clear-search');
+            if (btnClear) {
+                if (val) btnClear.classList.remove('hidden');
+                else btnClear.classList.add('hidden');
+            }
             searchTimeout = setTimeout(loadEvents, 300);
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('event-search');
+            input.value = '';
+            const btnClear = document.getElementById('btn-clear-search');
+            if (btnClear) btnClear.classList.add('hidden');
+            loadEvents();
         }
 
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             let bgClass = 'bg-slate-900 border-slate-700 text-white';
+            let barColor = 'bg-indigo-500';
             let icon = 'ℹ️';
 
             if (type === 'success') {
-                bgClass = 'bg-slate-900 border-emerald-500/40 text-emerald-300';
+                bgClass = 'bg-slate-900/95 border-emerald-500/40 text-emerald-300';
+                barColor = 'bg-emerald-500';
                 icon = '✅';
             } else if (type === 'error') {
-                bgClass = 'bg-slate-900 border-rose-500/40 text-rose-300';
+                bgClass = 'bg-slate-900/95 border-rose-500/40 text-rose-300';
+                barColor = 'bg-rose-500';
                 icon = '❌';
             }
 
-            toast.className = `fixed bottom-6 right-6 max-w-md p-4 rounded-2xl shadow-2xl z-50 text-xs sm:text-sm border flex items-center gap-3 transition-all duration-300 ${bgClass}`;
-            toast.innerHTML = `<span>${icon}</span><span class="font-medium">${escapeHtml(message)}</span>`;
+            toast.className = `fixed bottom-6 right-6 max-w-md p-4 rounded-2xl shadow-2xl z-50 text-xs sm:text-sm border backdrop-blur-md flex flex-col gap-2 transition-all duration-300 ${bgClass}`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-base">${icon}</span>
+                    <span class="font-medium">${escapeHtml(message)}</span>
+                </div>
+                <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full ${barColor} animate-pulse" style="width: 100%"></div>
+                </div>
+            `;
             toast.classList.remove('hidden');
 
             setTimeout(() => {
