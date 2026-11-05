@@ -148,11 +148,73 @@
                 </div>
             </div>
 
-            <!-- GRID DE EVENTOS -->
+            <!-- FILTROS TEMPORAIS E ALTERNADOR DE VISUALIZAÇÃO (GRADE VS CALENDÁRIO EDITORIAL) -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                <!-- FILTRO TEMPORAL -->
+                <div class="flex items-center gap-2 text-xs flex-wrap">
+                    <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider pl-1">Filtro:</span>
+                    <button onclick="setEventFilter('all')" id="btn-filter-all" class="px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white transition">
+                        Todos (<span id="count-all">0</span>)
+                    </button>
+                    <button onclick="setEventFilter('future')" id="btn-filter-future" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition">
+                        🟢 Futuros & Atuais (<span id="count-future">0</span>)
+                    </button>
+                    <button onclick="setEventFilter('past')" id="btn-filter-past" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition">
+                        ⚪ Expirados / Concluídos (<span id="count-past">0</span>)
+                    </button>
+                </div>
+
+                <!-- ALTERNADOR DE MODO (CARDS VS CALENDÁRIO) -->
+                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                    <button onclick="setEventViewMode('grid')" id="btn-view-grid" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition flex items-center gap-1.5">
+                        <span>🗂️</span> Grade de Cards
+                    </button>
+                    <button onclick="setEventViewMode('calendar')" id="btn-view-calendar" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+                        <span>📆</span> Calendário Editorial
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1. MODO GRADE DE CARDS -->
             <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-full py-16 text-center text-slate-400">
                     <div class="inline-block p-4 rounded-2xl bg-slate-900 border border-slate-800 mb-3">🎓</div>
                     <p class="font-medium text-white">Carregando catálogo de eventos...</p>
+                </div>
+            </div>
+
+            <!-- 2. MODO CALENDÁRIO EDITORIAL INTERATIVO -->
+            <div id="events-calendar" class="hidden bg-slate-900/80 rounded-3xl border border-slate-800 p-6 space-y-6 shadow-xl">
+                <!-- Cabeçalho do Calendário com navegação mês a mês -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                            <span>📆</span> Calendário Editorial Acadêmico
+                        </h3>
+                        <p class="text-xs text-slate-400">Navegue pelas datas passadas e futuras para gerenciar a programação institucional.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="navigateMonth(-1)" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition font-bold" title="Mês Anterior">◀</button>
+                        <span id="calendar-month-year" class="px-4 py-2 rounded-xl bg-slate-950 font-bold text-sm text-indigo-300 border border-slate-800 min-w-[160px] text-center">Novembro 2026</span>
+                        <button onclick="navigateMonth(1)" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition font-bold" title="Mês Seguinte">▶</button>
+                        <button onclick="goToCurrentMonth()" class="px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition">Hoje</button>
+                    </div>
+                </div>
+
+                <!-- Grade do Calendário: Dias da Semana -->
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase text-slate-400 tracking-wider">
+                    <div class="py-2 text-rose-400">Dom</div>
+                    <div class="py-2">Seg</div>
+                    <div class="py-2">Ter</div>
+                    <div class="py-2">Qua</div>
+                    <div class="py-2">Qui</div>
+                    <div class="py-2">Sex</div>
+                    <div class="py-2 text-indigo-400">Sáb</div>
+                </div>
+
+                <!-- Grade de Células dos Dias -->
+                <div id="calendar-days-grid" class="grid grid-cols-7 gap-2 text-xs">
+                    <!-- Gerado dinamicamente via JS -->
                 </div>
             </div>
         </section>
@@ -444,6 +506,10 @@
         let currentToken = localStorage.getItem('rbac_token') || null;
         let authMode = 'login'; // 'login' ou 'register'
         let searchTimeout = null;
+        let allLoadedEvents = [];
+        let currentEventFilter = 'all'; // 'all', 'future', 'past'
+        let currentEventViewMode = 'grid'; // 'grid', 'calendar'
+        let calendarDate = new Date(); // Mês de navegação do calendário editorial
 
         const DEMO_ACCOUNTS = {
             ADMIN: { email: 'admin@eventos.edu.br', password: 'Admin@123456' },
@@ -657,98 +723,271 @@
             loadSubscriptions();
         }
 
-        // CARREGAMENTO E RENDERIZAÇÃO DE EVENTOS
+        // FILTRO TEMPORAL (TODOS, FUTUROS, EXPIRADOS)
+        function setEventFilter(filter) {
+            currentEventFilter = filter;
+            document.querySelectorAll('#btn-filter-all, #btn-filter-future, #btn-filter-past').forEach(btn => {
+                btn.className = 'px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition';
+            });
+            const activeBtn = document.getElementById(`btn-filter-${filter}`);
+            if (activeBtn) {
+                activeBtn.className = 'px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white transition';
+            }
+            renderEvents();
+        }
+
+        // ALTERNADOR DE MODO DE VISUALIZAÇÃO (CARDS VS CALENDÁRIO EDITORIAL)
+        function setEventViewMode(mode) {
+            currentEventViewMode = mode;
+            const btnGrid = document.getElementById('btn-view-grid');
+            const btnCal = document.getElementById('btn-view-calendar');
+            const gridEl = document.getElementById('events-grid');
+            const calEl = document.getElementById('events-calendar');
+
+            if (mode === 'grid') {
+                btnGrid.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition flex items-center gap-1.5 font-bold';
+                btnCal.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 font-semibold';
+                gridEl.classList.remove('hidden');
+                calEl.classList.add('hidden');
+            } else {
+                btnCal.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition flex items-center gap-1.5 font-bold';
+                btnGrid.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 font-semibold';
+                gridEl.classList.add('hidden');
+                calEl.classList.remove('hidden');
+                renderCalendar();
+            }
+            renderEvents();
+        }
+
+        // CARREGAMENTO DE EVENTOS DA API
         async function loadEvents() {
             const grid = document.getElementById('events-grid');
             const search = document.getElementById('event-search').value;
             grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400">Buscando eventos...</div>';
 
             try {
-                const path = search ? `/events?q=${encodeURIComponent(search)}` : '/events';
-                const events = await api(path);
+                const path = search ? `/events?search=${encodeURIComponent(search)}&limit=100` : '/events?limit=100';
+                const res = await api(path);
+                allLoadedEvents = Array.isArray(res) ? res : (res.data || []);
 
-                if (!events || events.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full py-16 text-center bg-slate-900/40 rounded-3xl border border-slate-800 p-8 space-y-3">
-                            <span class="text-4xl">📅</span>
-                            <h3 class="text-lg font-bold text-white">Nenhum evento encontrado</h3>
-                            <p class="text-xs text-slate-400 max-w-sm mx-auto">Nenhum evento corresponde à busca ou o catálogo está vazio.</p>
-                            ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? 
-                                '<button onclick="openCreateEventModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition">Criar Primeiro Evento</button>' : 
-                                '<button onclick="init()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition">Carregar Eventos Padrão</button>'
-                            }
-                        </div>
-                    `;
-                    return;
+                // Atualiza contadores dos filtros temporais
+                const now = new Date();
+                const futureCount = allLoadedEvents.filter(e => new Date(e.event_date) >= now).length;
+                const pastCount = allLoadedEvents.filter(e => new Date(e.event_date) < now).length;
+
+                document.getElementById('count-all').textContent = allLoadedEvents.length;
+                document.getElementById('count-future').textContent = futureCount;
+                document.getElementById('count-past').textContent = pastCount;
+
+                renderEvents();
+                if (currentEventViewMode === 'calendar') {
+                    renderCalendar();
                 }
+            } catch (err) {
+                grid.innerHTML = '<div class="col-span-full py-16 text-center text-rose-400">Erro ao carregar eventos da API.</div>';
+            }
+        }
 
-                grid.innerHTML = events.map(e => {
-                    const eventDate = new Date(e.event_date).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                    const isFull = e.current_subscriptions >= e.capacity;
-                    const percent = Math.min(100, Math.round((e.current_subscriptions / e.capacity) * 100));
+        // RENDERIZAÇÃO DOS EVENTOS (CARDS)
+        function renderEvents() {
+            const grid = document.getElementById('events-grid');
+            const now = new Date();
+
+            let filtered = allLoadedEvents;
+            if (currentEventFilter === 'future') {
+                filtered = allLoadedEvents.filter(e => new Date(e.event_date) >= now);
+            } else if (currentEventFilter === 'past') {
+                filtered = allLoadedEvents.filter(e => new Date(e.event_date) < now);
+            }
+
+            if (!filtered || filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center bg-slate-900/40 rounded-3xl border border-slate-800 p-8 space-y-3">
+                        <span class="text-4xl">📅</span>
+                        <h3 class="text-lg font-bold text-white">Nenhum evento neste período</h3>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Nenhum evento encontrado para o filtro selecionado.</p>
+                        ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? 
+                            '<button onclick="openCreateEventModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition">Criar Novo Evento</button>' : ''
+                        }
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(e => {
+                const dt = new Date(e.event_date);
+                const isPast = dt < now;
+                const eventDateFormatted = dt.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                const currentSubs = e.current_subscriptions || e.total_subscriptions || 0;
+                const isFull = currentSubs >= e.capacity;
+                const percent = Math.min(100, Math.round((currentSubs / e.capacity) * 100));
+
+                return `
+                    <div class="bg-slate-900/80 rounded-3xl border ${isPast ? 'border-slate-800/60 opacity-80' : 'border-slate-800/90'} hover:border-indigo-500/40 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden group">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                ${isPast ? 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>' : 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🟢 Aberto / Futuro</span>'
+                                }
+                                <span class="text-xs text-slate-400 font-mono">ID #${e.id}</span>
+                            </div>
+
+                            <h3 class="font-bold text-lg text-white group-hover:text-indigo-300 transition leading-snug">${escapeHtml(e.title)}</h3>
+                            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(e.description || 'Sem descrição.')}</p>
+                            
+                            <div class="space-y-1.5 pt-2 text-xs text-slate-300 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-500">📅</span> <span>${eventDateFormatted}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-500">📍</span> <span>${escapeHtml(e.location || 'Campus Universitário')}</span>
+                                </div>
+                                ${e.organizer_name ? `
+                                    <div class="flex items-center gap-2 text-slate-400 text-[11px]">
+                                        <span>👤</span> <span>Organizador: ${escapeHtml(e.organizer_name)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- BARRA DE VAGAS -->
+                            <div class="pt-3 space-y-1">
+                                <div class="flex justify-between text-[11px] font-medium">
+                                    <span class="text-slate-400">${isPast ? 'Participantes Registrados' : 'Vagas Ocupadas'}</span>
+                                    <span class="${isFull ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}">${currentSubs} / ${e.capacity} (${percent}%)</span>
+                                </div>
+                                <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                                    <div class="h-full ${isPast ? 'bg-slate-600' : (isFull ? 'bg-rose-500' : 'bg-indigo-500')} transition-all duration-500" style="width: ${percent}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BOTÕES DE AÇÃO DO CARD -->
+                        <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                            <div class="flex-1">
+                                ${isPast ? `
+                                    <span class="inline-block w-full py-2.5 text-center text-xs font-semibold text-slate-400 bg-slate-800/50 rounded-xl">Evento Concluído</span>
+                                ` : (isFull ? `
+                                    <span class="inline-block w-full py-2.5 text-center text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">Esgotado</span>
+                                ` : `
+                                    <button onclick="subscribeToEvent(${e.id})" class="w-full py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
+                                        <span>✍️</span> Inscrever-se
+                                    </button>
+                                `)}
+                            </div>
+
+                            <!-- CONTROLES DO ADMIN E DO EDITOR -->
+                            <div class="flex items-center gap-1">
+                                ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? `
+                                    <button onclick="openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Editar Evento">
+                                        ✏️
+                                    </button>
+                                ` : ''}
+
+                                ${currentUser?.role === 'ADMIN' ? `
+                                    <button onclick="deleteEvent(${e.id})" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition" title="Excluir Evento (Apenas Admin)">
+                                        🗑️
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // RENDERIZAÇÃO DO CALENDÁRIO EDITORIAL INTERATIVO
+        function renderCalendar() {
+            const monthNames = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            const monthYearEl = document.getElementById('calendar-month-year');
+            if (monthYearEl) {
+                monthYearEl.textContent = `${monthNames[month]} ${year}`;
+            }
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDayDate = new Date(year, month + 1, 0).getDate();
+            const prevLastDay = new Date(year, month, 0).getDate();
+
+            const grid = document.getElementById('calendar-days-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const now = new Date();
+            const todayDate = now.getDate();
+            const isCurrentMonth = now.getFullYear() === year && now.getMonth() === month;
+
+            // Dias do mês anterior (para trás no tempo)
+            for (let x = firstDayIndex; x > 0; x--) {
+                const day = prevLastDay - x + 1;
+                grid.innerHTML += `
+                    <div class="min-h-[105px] p-2 bg-slate-950/40 border border-slate-800/40 rounded-2xl opacity-40 text-slate-500">
+                        <span class="font-bold text-xs">${day}</span>
+                    </div>
+                `;
+            }
+
+            // Dias do mês atual
+            for (let i = 1; i <= lastDayDate; i++) {
+                const isToday = isCurrentMonth && i === todayDate;
+                const cellDate = new Date(year, month, i);
+                const isCellPast = cellDate < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+                // Filtra os eventos agendados para este dia
+                const dayEvents = allLoadedEvents.filter(e => {
+                    const eDate = new Date(e.event_date);
+                    return eDate.getFullYear() === year && eDate.getMonth() === month && eDate.getDate() === i;
+                });
+
+                let eventsHtml = dayEvents.map(e => {
+                    const eDt = new Date(e.event_date);
+                    const ePast = eDt < now;
+                    const timeStr = eDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    const badgeBg = ePast ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-indigo-600/20 text-indigo-300 border-indigo-500/30';
 
                     return `
-                        <div class="bg-slate-900/80 rounded-3xl border border-slate-800/80 hover:border-indigo-500/40 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden group">
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Evento Acadêmico</span>
-                                    <span class="text-xs text-slate-400 font-medium">ID #${e.id}</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-white group-hover:text-indigo-300 transition leading-snug">${escapeHtml(e.title)}</h3>
-                                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(e.description || 'Sem descrição.')}</p>
-                                
-                                <div class="space-y-1.5 pt-2 text-xs text-slate-300 font-medium">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-500">📅</span> <span>${eventDate}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-500">📍</span> <span>${escapeHtml(e.location || 'Campus Universitário')}</span>
-                                    </div>
-                                </div>
-
-                                <!-- BARRA DE VAGAS -->
-                                <div class="pt-3 space-y-1">
-                                    <div class="flex justify-between text-[11px] font-medium">
-                                        <span class="text-slate-400">Vagas Ocupadas</span>
-                                        <span class="${isFull ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}">${e.current_subscriptions} / ${e.capacity} (${percent}%)</span>
-                                    </div>
-                                    <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                                        <div class="h-full ${isFull ? 'bg-rose-500' : 'bg-indigo-500'} transition-all duration-500" style="width: ${percent}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- BOTÕES DE AÇÃO DO CARD -->
-                            <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                                <div class="flex-1">
-                                    ${isFull ? 
-                                        '<span class="inline-block w-full py-2.5 text-center text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">Esgotado</span>' : 
-                                        `<button onclick="subscribeToEvent(${e.id})" class="w-full py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
-                                            <span>✍️</span> Inscrever-se
-                                        </button>`
-                                    }
-                                </div>
-
-                                <!-- CONTROLES DO ADMIN E DO EDITOR -->
-                                <div class="flex items-center gap-1">
-                                    ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? `
-                                        <button onclick="openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Editar Evento">
-                                            ✏️
-                                        </button>
-                                    ` : ''}
-
-                                    ${currentUser?.role === 'ADMIN' ? `
-                                        <button onclick="deleteEvent(${e.id})" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition" title="Excluir Evento (Apenas Admin)">
-                                            🗑️
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            </div>
+                        <div onclick="openEventDetailsModal(${e.id})" class="p-1.5 rounded-lg border text-[10px] cursor-pointer hover:scale-[1.02] transition truncate font-medium ${badgeBg}" title="${escapeHtml(e.title)} (${timeStr})">
+                            <span class="font-bold">${timeStr}</span> ${escapeHtml(e.title)}
                         </div>
                     `;
                 }).join('');
-            } catch (err) {
-                grid.innerHTML = '<div class="col-span-full py-16 text-center text-rose-400">Erro ao carregar eventos da API.</div>';
+
+                grid.innerHTML += `
+                    <div class="min-h-[105px] p-2 bg-slate-900/60 border ${isToday ? 'border-indigo-500 ring-1 ring-indigo-500/50' : (isCellPast ? 'border-slate-800/60 opacity-90' : 'border-slate-800')} rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-xs ${isToday ? 'px-2 py-0.5 rounded-full bg-indigo-600 text-white' : (isCellPast ? 'text-slate-400' : 'text-slate-200')}">${i}</span>
+                            ${dayEvents.length > 0 ? `<span class="text-[9px] font-bold px-1.5 rounded-full bg-indigo-500/20 text-indigo-400">${dayEvents.length}</span>` : ''}
+                        </div>
+                        <div class="space-y-1 flex-1 overflow-y-auto custom-scrollbar max-h-[70px]">
+                            ${eventsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function navigateMonth(direction) {
+            calendarDate.setMonth(calendarDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function goToCurrentMonth() {
+            calendarDate = new Date();
+            renderCalendar();
+        }
+
+        function openEventDetailsModal(eventId) {
+            const ev = allLoadedEvents.find(e => e.id === eventId);
+            if (!ev) return;
+            if (['ADMIN', 'EDITOR'].includes(currentUser?.role)) {
+                openEditEventModal(ev);
+            } else {
+                subscribeToEvent(ev.id);
             }
         }
 

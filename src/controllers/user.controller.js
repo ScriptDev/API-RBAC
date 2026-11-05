@@ -188,7 +188,7 @@ exports.setupDemoAccounts = async (req, res) => {
             ON CONFLICT (email) DO UPDATE SET password = $1, name = 'Carlos Aluno'
         `, [userPass]);
 
-        // 4. Insere 3 eventos acadêmicos se a tabela de eventos estiver vazia
+        // 4. Insere eventos acadêmicos (futuros e passados) se a tabela estiver vazia
         const eventsCount = await db.query('SELECT COUNT(*) FROM events');
         if (parseInt(eventsCount.rows[0].count) === 0) {
             const adminRes = await db.query("SELECT id FROM users WHERE email = 'admin@eventos.edu.br'");
@@ -199,7 +199,7 @@ exports.setupDemoAccounts = async (req, res) => {
                 VALUES 
                 ('Simpósio de Inteligência Artificial e Engenharia de Software 2026', 'Palestrantes abordando agentes autônomos, LLMs, Clean Architecture e DevSecOps.', CURRENT_TIMESTAMP + INTERVAL '15 days', 'Auditório Nobre Central', 100, $1),
                 ('Workshop de Microsserviços e Segurança RBAC com Node.js', 'Construção prática de APIs REST com autenticação JWT, controle de acesso e Docker.', CURRENT_TIMESTAMP + INTERVAL '7 days', 'Laboratório de Informática 3', 2, $1),
-                ('Seminário Nacional de Cibersegurança e Proteção de Dados', 'Boas práticas OWASP, Zero-Trust e proteção contra vazamento de credenciais.', CURRENT_TIMESTAMP + INTERVAL '30 days', 'Transmissão Online / YouTube Live', 50, $1)
+                ('Seminário Nacional de Cibersegurança e Proteção de Dados (Edição Anterior)', 'Boas práticas OWASP, Zero-Trust e proteção contra vazamento de credenciais.', CURRENT_TIMESTAMP - INTERVAL '10 days', 'Auditório Nobre Central', 50, $1)
             `, [adminId]);
         }
 
