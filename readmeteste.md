@@ -468,11 +468,27 @@ Abaixo está o resumo executivo dos critérios de aceite de cada endpoint para f
 | **Listar Todos os Usuários**| `/users` | `GET` | ✓ | ✓ | ✖ | ✖ | `200 OK` | `401 / 403` |
 | **Editar Usuário** | `/users/:id` | `PUT` | ✓ *(Todos)* | ✓ *(Apenas USER)* | ✓ *(Apenas o seu)* | ✖ | `200 OK` | `403 Forbidden` |
 | **Deletar Usuário** | `/users/:id` | `DELETE` | ✓ | ✖ | ✖ | ✖ | `200 OK` | `401 / 403` |
-| **Inscrever-se em Evento** | `/subscriptions` | `POST` | ✓ | ✓ | ✓ | ✖ | `201 Created` | `400 (Lotado) / 409 (Duplicado)` |
+| **Inscrever-se em Evento** | `/subscriptions` | `POST` | ✓ | ✓ | ✓ *(Apenas Atuais/Futuros)* | ✖ | `201 Created` | `400 (Lotado/Expirado) / 409 (Duplicado)` |
 | **Listar Inscrições** | `/subscriptions` | `GET` | ✓ *(Todas)* | ✓ *(Todas)* | ✓ *(Apenas as suas)* | ✖ | `200 OK` | `401 Unauthorized` |
 | **Cancelar Inscrição** | `/subscriptions/:id` | `DELETE` | ✓ | ✓ | ✓ *(Apenas a sua)* | ✖ | `200 OK` | `403 Forbidden` |
 | **Emitir Certificado** | `/certificates/:id` | `GET` | ✓ | ✓ | ✓ *(Apenas o seu)* | ✖ | `200 OK` | `401 / 403` |
 | **Validação de Código Hash**| `/certificates/validate/:code` | `GET` | ✓ | ✓ | ✓ | ✓ | `200 OK` | `404 Not Found` |
+
+---
+
+### 8.1 Regras de Negócio e Segregação Temporal de Eventos (USER vs ADMIN/EDITOR)
+
+Para atender estritamente ao domínio acadêmico e à integridade operacional:
+1. **Eventos Atuais e Futuros (`event_date >= agora`):**
+   - **Visibilidade:** Disponíveis publicamente no catálogo e calendário (PÚBLICO, USER, EDITOR, ADMIN).
+   - **Inscrição:** Usuários com perfil `USER` podem se inscrever com 1 clique (desde que haja vagas disponíveis e não haja duplicidade).
+   - **Modal de Detalhes:** Qualquer usuário pode consultar detalhes completos (ementa, palestrantes, local, data/hora e percentual de lotação).
+
+2. **Eventos Passados / Concluídos (`event_date < agora`):**
+   - **Bloqueio Criptográfico e de Negócio:** O backend bloqueia novas inscrições retornando `HTTP 400`: *"Inscrições encerradas. Não é possível se inscrever em um evento acadêmico que já ocorreu."*
+   - **Segregação Visual para Aluno (`USER`):** O aluno visualiza estritamente os eventos passados em que **participou (estava inscrito)**. Eventos passados de terceiros são filtrados para não poluir sua visão acadêmica.
+   - **Emissão Direta de Certificado:** No card e no modal do evento passado em que o aluno participou, exibe-se o badge `🎓 Concluído • Você Participou` e o botão direto `🎓 Ver Certificado`, abrindo instantaneamente o diploma com validação criptográfica.
+   - **Visão Editorial (ADMIN e EDITOR):** Têm acesso global e irrestrito a todo o histórico de eventos da instituição para auditoria, emissão de relatórios e planejamento no Calendário Editorial.
 
 ---
 

@@ -203,6 +203,25 @@ exports.setupDemoAccounts = async (req, res) => {
             `, [adminId]);
         }
 
+        // 5. Garante que o Aluno tenha participação registrada no evento passado para teste de certificação
+        const pastEventRes = await db.query("SELECT id FROM events WHERE title LIKE '%Seminário Nacional de Cibersegurança%' LIMIT 1");
+        const alunoRes = await db.query("SELECT id FROM users WHERE email = 'aluno@eventos.edu.br' LIMIT 1");
+        if (pastEventRes.rows.length > 0 && alunoRes.rows.length > 0) {
+            const pastEventId = pastEventRes.rows[0].id;
+            const alunoId = alunoRes.rows[0].id;
+            const existingSub = await db.query("SELECT id FROM subscriptions WHERE user_id = $1 AND event_id = $2", [alunoId, pastEventId]);
+            let subId = existingSub.rows[0]?.id;
+            if (!subId) {
+                const subInsert = await db.query("INSERT INTO subscriptions (user_id, event_id) VALUES ($1, $2) RETURNING id", [alunoId, pastEventId]);
+                subId = subInsert.rows[0].id;
+            }
+            const existingCert = await db.query("SELECT id FROM certificates WHERE subscription_id = $1", [subId]);
+            if (existingCert.rows.length === 0) {
+                const certCode = `CERT-${pastEventId}-${subId}-SEC2026`;
+                await db.query("INSERT INTO certificates (subscription_id, certificate_code) VALUES ($1, $2)", [subId, certCode]);
+            }
+        }
+
         res.json({ message: 'Ambiente de demonstração e eventos de teste preparados com sucesso!' });
     } catch (err) {
         console.error('[setupDemoAccounts] Erro:', err);

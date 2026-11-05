@@ -35,14 +35,21 @@ exports.create = async (req, res) => {
 
         const event = eventRes.rows[0];
 
-        // 2. Verifica se a capacidade foi excedida
+        // 2. Validação temporal: Inscrições permitidas apenas para eventos atuais ou futuros
+        if (new Date(event.event_date) < new Date()) {
+            return res.status(400).json({
+                error: 'Inscrições encerradas. Não é possível se inscrever em um evento acadêmico que já ocorreu.'
+            });
+        }
+
+        // 3. Verifica se a capacidade foi excedida
         if (event.capacity && event.current_subscriptions >= event.capacity) {
             return res.status(400).json({
                 error: 'Inscrições encerradas. A capacidade máxima do evento foi atingida.'
             });
         }
 
-        // 3. Verifica duplicidade de inscrição
+        // 4. Verifica duplicidade de inscrição
         const checkSub = await db.query(
             'SELECT * FROM subscriptions WHERE user_id = $1 AND event_id = $2',
             [targetUserId, event_id]

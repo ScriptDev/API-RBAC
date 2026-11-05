@@ -499,6 +499,67 @@
     </div>
 
     <!-- ============================================================ -->
+    <!-- MODAL DE DETALHES DO EVENTO ACADÊMICO -->
+    <!-- ============================================================ -->
+    <div id="event-details-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeEventDetailsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold transition">&times;</button>
+
+            <!-- CABEÇALHO DO MODAL -->
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 flex-wrap" id="details-badges"></div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-white leading-tight" id="details-title">Título do Evento</h3>
+                <p class="text-xs text-slate-400 font-mono" id="details-meta">ID #0 • Criado no Sistema</p>
+            </div>
+
+            <!-- STATUS DE PARTICIPAÇÃO DO USUÁRIO -->
+            <div id="details-user-status-box" class="p-4 rounded-2xl border text-xs"></div>
+
+            <!-- INFORMAÇÕES LOGÍSTICAS & ESTRUTURAIS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/70 p-4 rounded-2xl border border-slate-800 text-xs">
+                <div class="space-y-1">
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">📅 Data e Horário:</span>
+                    <p class="text-white font-medium text-sm" id="details-date">--/--/---- às --:--</p>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">📍 Local / Ambiente:</span>
+                    <p class="text-white font-medium text-sm" id="details-location">Auditório</p>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">👤 Organizador / Responsável:</span>
+                    <p class="text-slate-300 font-medium" id="details-organizer">Coordenação</p>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-500 font-semibold uppercase text-[10px] tracking-wider">👥 Vagas & Lotação:</span>
+                    <p class="text-slate-300 font-medium" id="details-capacity-text">0 / 0 vagas preenchidas</p>
+                </div>
+            </div>
+
+            <!-- BARRA DE PROGRESSO DE OCUPAÇÃO -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400">
+                    <span>Ocupação do Evento</span>
+                    <span id="details-capacity-percent">0%</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                    <div id="details-capacity-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- DESCRIÇÃO COMPLETA -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Ementa e Descrição Completa:</h4>
+                <div class="p-4 rounded-2xl bg-slate-950/50 border border-slate-800 text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap" id="details-description">
+                    Sem descrição detalhada.
+                </div>
+            </div>
+
+            <!-- AÇÕES CONTEXTUAIS DO MODAL -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800" id="details-actions"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- JAVASCRIPT DE INTEGRAÇÃO & COMPORTAMENTO DO SISTEMA -->
     <!-- ============================================================ -->
     <script>
@@ -507,6 +568,8 @@
         let authMode = 'login'; // 'login' ou 'register'
         let searchTimeout = null;
         let allLoadedEvents = [];
+        let visibleEvents = [];
+        let userSubscriptions = [];
         let currentEventFilter = 'all'; // 'all', 'future', 'past'
         let currentEventViewMode = 'grid'; // 'grid', 'calendar'
         let calendarDate = new Date(); // Mês de navegação do calendário editorial
@@ -766,18 +829,63 @@
             grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400">Buscando eventos...</div>';
 
             try {
+                // Carrega inscrições do usuário logado para cruzar status de participação
+                if (currentUser) {
+                    try {
+                        const subsRes = await api('/subscriptions');
+                        userSubscriptions = Array.isArray(subsRes) ? subsRes : (subsRes.data || []);
+                    } catch (_) {
+                        userSubscriptions = [];
+                    }
+                } else {
+                    userSubscriptions = [];
+                }
+
                 const path = search ? `/events?search=${encodeURIComponent(search)}&limit=100` : '/events?limit=100';
                 const res = await api(path);
                 allLoadedEvents = Array.isArray(res) ? res : (res.data || []);
 
-                // Atualiza contadores dos filtros temporais
+                // ========================================================
+                // REGRA DE NEGÓCIO RBAC DE VISIBILIDADE DE EVENTOS:
+                // - Eventos futuros/atuais (>= agora): Visíveis para todos
+                // - Eventos passados (< agora):
+                //    * ADMIN / EDITOR: Visão total de histórico
+                //    * USER (Aluno): Apenas eventos em que participou (estava inscrito)
+                //    * PÚBLICO: Não vê eventos expirados
+                // ========================================================
                 const now = new Date();
-                const futureCount = allLoadedEvents.filter(e => new Date(e.event_date) >= now).length;
-                const pastCount = allLoadedEvents.filter(e => new Date(e.event_date) < now).length;
+                const isPrivileged = ['ADMIN', 'EDITOR'].includes(currentUser?.role);
+                const isUser = currentUser?.role === 'USER';
 
-                document.getElementById('count-all').textContent = allLoadedEvents.length;
+                visibleEvents = allLoadedEvents.filter(e => {
+                    const isPast = new Date(e.event_date) < now;
+                    if (!isPast) return true; // Eventos atuais e futuros são públicos
+                    if (isPrivileged) return true; // Gestão editorial vê tudo
+                    if (isUser) {
+                        return userSubscriptions.some(s => s.event_id === e.id); // Apenas se participou
+                    }
+                    return false; // Visitante não vê passados
+                });
+
+                // Atualiza contadores com base na matriz visível para este papel
+                const futureCount = visibleEvents.filter(e => new Date(e.event_date) >= now).length;
+                const pastCount = visibleEvents.filter(e => new Date(e.event_date) < now).length;
+
+                document.getElementById('count-all').textContent = visibleEvents.length;
                 document.getElementById('count-future').textContent = futureCount;
                 document.getElementById('count-past').textContent = pastCount;
+
+                // Atualiza o texto do botão de filtro passado conforme o papel
+                const btnPast = document.getElementById('btn-filter-past');
+                if (btnPast) {
+                    if (isUser) {
+                        btnPast.innerHTML = `🎓 Meus Concluídos (<span id="count-past">${pastCount}</span>)`;
+                    } else if (isPrivileged) {
+                        btnPast.innerHTML = `⚪ Histórico Geral (<span id="count-past">${pastCount}</span>)`;
+                    } else {
+                        btnPast.innerHTML = `⚪ Concluídos (<span id="count-past">0</span>)`;
+                    }
+                }
 
                 renderEvents();
                 if (currentEventViewMode === 'calendar') {
@@ -793,11 +901,11 @@
             const grid = document.getElementById('events-grid');
             const now = new Date();
 
-            let filtered = allLoadedEvents;
+            let filtered = visibleEvents;
             if (currentEventFilter === 'future') {
-                filtered = allLoadedEvents.filter(e => new Date(e.event_date) >= now);
+                filtered = visibleEvents.filter(e => new Date(e.event_date) >= now);
             } else if (currentEventFilter === 'past') {
-                filtered = allLoadedEvents.filter(e => new Date(e.event_date) < now);
+                filtered = visibleEvents.filter(e => new Date(e.event_date) < now);
             }
 
             if (!filtered || filtered.length === 0) {
@@ -805,7 +913,11 @@
                     <div class="col-span-full py-16 text-center bg-slate-900/40 rounded-3xl border border-slate-800 p-8 space-y-3">
                         <span class="text-4xl">📅</span>
                         <h3 class="text-lg font-bold text-white">Nenhum evento neste período</h3>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Nenhum evento encontrado para o filtro selecionado.</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">
+                            ${currentEventFilter === 'past' && currentUser?.role === 'USER' ? 
+                                'Você não possui participações em eventos passados. Inscreva-se nos eventos futuros disponíveis para emitir seus diplomas!' : 
+                                'Nenhum evento acadêmico disponível para o filtro selecionado.'}
+                        </p>
                         ${['ADMIN', 'EDITOR'].includes(currentUser?.role) ? 
                             '<button onclick="openCreateEventModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition">Criar Novo Evento</button>' : ''
                         }
@@ -821,19 +933,26 @@
                 const currentSubs = e.current_subscriptions || e.total_subscriptions || 0;
                 const isFull = currentSubs >= e.capacity;
                 const percent = Math.min(100, Math.round((currentSubs / e.capacity) * 100));
+                const userSub = userSubscriptions.find(s => s.event_id === e.id);
 
                 return `
-                    <div class="bg-slate-900/80 rounded-3xl border ${isPast ? 'border-slate-800/60 opacity-80' : 'border-slate-800/90'} hover:border-indigo-500/40 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden group">
+                    <div class="bg-slate-900/80 rounded-3xl border ${isPast ? 'border-amber-500/30 bg-slate-900/90' : 'border-slate-800/90'} hover:border-indigo-500/40 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden group">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between gap-2 flex-wrap">
-                                ${isPast ? 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>' : 
-                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🟢 Aberto / Futuro</span>'
-                                }
+                                ${isPast ? (userSub ? 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">🎓 Concluído • Você Participou</span>' : 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>'
+                                ) : (userSub ? 
+                                    '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">🟢 Aberto • Inscrito ✓</span>' : 
+                                    (isFull ? 
+                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">🔴 Esgotado</span>' : 
+                                        '<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">🟢 Aberto / Futuro</span>'
+                                    )
+                                )}
                                 <span class="text-xs text-slate-400 font-mono">ID #${e.id}</span>
                             </div>
 
-                            <h3 class="font-bold text-lg text-white group-hover:text-indigo-300 transition leading-snug">${escapeHtml(e.title)}</h3>
+                            <h3 class="font-bold text-lg text-white group-hover:text-indigo-300 transition leading-snug cursor-pointer" onclick="openEventDetailsModal(${e.id})">${escapeHtml(e.title)}</h3>
                             <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(e.description || 'Sem descrição.')}</p>
                             
                             <div class="space-y-1.5 pt-2 text-xs text-slate-300 font-medium">
@@ -857,23 +976,36 @@
                                     <span class="${isFull ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}">${currentSubs} / ${e.capacity} (${percent}%)</span>
                                 </div>
                                 <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                                    <div class="h-full ${isPast ? 'bg-slate-600' : (isFull ? 'bg-rose-500' : 'bg-indigo-500')} transition-all duration-500" style="width: ${percent}%"></div>
+                                    <div class="h-full ${isPast ? 'bg-amber-600' : (isFull ? 'bg-rose-500' : 'bg-indigo-500')} transition-all duration-500" style="width: ${percent}%"></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- BOTÕES DE AÇÃO DO CARD -->
                         <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                            <div class="flex-1">
-                                ${isPast ? `
-                                    <span class="inline-block w-full py-2.5 text-center text-xs font-semibold text-slate-400 bg-slate-800/50 rounded-xl">Evento Concluído</span>
-                                ` : (isFull ? `
-                                    <span class="inline-block w-full py-2.5 text-center text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">Esgotado</span>
+                            <div class="flex items-center gap-2 flex-1">
+                                ${isPast ? (userSub ? `
+                                    <button onclick="viewCertificate(${userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white shadow-md shadow-amber-600/20 transition flex items-center justify-center gap-1.5">
+                                        <span>🎓</span> Ver Certificado
+                                    </button>
                                 ` : `
-                                    <button onclick="subscribeToEvent(${e.id})" class="w-full py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
+                                    <span class="flex-1 py-2.5 text-center text-xs font-semibold text-slate-500 bg-slate-800/40 rounded-xl">Evento Concluído</span>
+                                `) : (userSub ? `
+                                    <button onclick="cancelSubscription(${userSub.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-300 hover:border-rose-500/30 transition flex items-center justify-center gap-1.5 group/btn" title="Clique para cancelar sua vaga">
+                                        <span class="group-hover/btn:hidden">Inscrito ✓</span>
+                                        <span class="hidden group-hover/btn:inline">Cancelar Vaga</span>
+                                    </button>
+                                ` : (isFull ? `
+                                    <span class="flex-1 py-2.5 text-center text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">Esgotado</span>
+                                ` : `
+                                    <button onclick="subscribeToEvent(${e.id})" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
                                         <span>✍️</span> Inscrever-se
                                     </button>
-                                `)}
+                                `))}
+
+                                <button onclick="openEventDetailsModal(${e.id})" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-1" title="Ver detalhes completos do evento">
+                                    <span>🔍</span> Detalhes
+                                </button>
                             </div>
 
                             <!-- CONTROLES DO ADMIN E DO EDITOR -->
@@ -894,6 +1026,134 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // MODAL DE DETALHES DO EVENTO ACADÊMICO
+        function openEventDetailsModal(eventId) {
+            const e = allLoadedEvents.find(ev => ev.id === eventId);
+            if (!e) return;
+
+            const now = new Date();
+            const dt = new Date(e.event_date);
+            const isPast = dt < now;
+            const currentSubs = e.current_subscriptions || e.total_subscriptions || 0;
+            const isFull = currentSubs >= e.capacity;
+            const percent = Math.min(100, Math.round((currentSubs / e.capacity) * 100));
+            const userSub = userSubscriptions.find(s => s.event_id === e.id);
+
+            // Título e Meta
+            document.getElementById('details-title').textContent = e.title;
+            document.getElementById('details-meta').textContent = `Evento Acadêmico #${e.id} • Cadastrado no Sistema`;
+            document.getElementById('details-description').textContent = e.description || 'Nenhuma descrição detalhada informada para este evento.';
+            document.getElementById('details-date').textContent = dt.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+            document.getElementById('details-location').textContent = e.location || 'Campus Universitário / Sala Principal';
+            document.getElementById('details-organizer').textContent = e.organizer_name ? `${e.organizer_name} (Docência / Coordenação)` : 'Coordenação Geral de Eventos';
+            document.getElementById('details-capacity-text').textContent = `${currentSubs} de ${e.capacity} vagas preenchidas (${e.capacity - currentSubs > 0 ? (e.capacity - currentSubs) + ' vagas restantes' : 'Capacidade máxima atingida'})`;
+            document.getElementById('details-capacity-percent').textContent = `${percent}%`;
+            
+            const capBar = document.getElementById('details-capacity-bar');
+            capBar.style.width = `${percent}%`;
+            capBar.className = `h-full ${isPast ? 'bg-amber-600' : (isFull ? 'bg-rose-500' : 'bg-indigo-500')} transition-all duration-500`;
+
+            // Badges
+            const badgesEl = document.getElementById('details-badges');
+            let badgesHtml = '';
+            if (isPast && userSub) {
+                badgesHtml = '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">🎓 Concluído • Você Participou</span>';
+            } else if (isPast) {
+                badgesHtml = '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">⚪ Encerrado / Histórico</span>';
+            } else if (userSub) {
+                badgesHtml = '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">🟢 Aberto • Inscrito ✓</span>';
+            } else if (isFull) {
+                badgesHtml = '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/30">🔴 Esgotado</span>';
+            } else {
+                badgesHtml = '<span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">🟢 Aberto / Inscrições Disponíveis</span>';
+            }
+            badgesEl.innerHTML = badgesHtml;
+
+            // Banner de Status do Usuário
+            const statusBox = document.getElementById('details-user-status-box');
+            if (userSub && isPast) {
+                statusBox.className = 'p-4 rounded-2xl border text-xs bg-amber-500/10 border-amber-500/30 text-amber-200 flex items-center justify-between gap-3';
+                statusBox.innerHTML = `
+                    <div class="space-y-0.5">
+                        <p class="font-bold text-sm text-amber-300 flex items-center gap-1.5"><span>🏆</span> Participação Concluída com Êxito</p>
+                        <p class="text-xs text-amber-200/80">Inscrição #${userSub.id} confirmada. Seu certificado acadêmico oficial com autenticidade criptográfica está emitido e disponível para visualização e impressão.</p>
+                    </div>
+                `;
+            } else if (userSub) {
+                statusBox.className = 'p-4 rounded-2xl border text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-200 flex items-center justify-between gap-3';
+                statusBox.innerHTML = `
+                    <div class="space-y-0.5">
+                        <p class="font-bold text-sm text-emerald-300 flex items-center gap-1.5"><span>✓</span> Sua Vaga Está Garantida!</p>
+                        <p class="text-xs text-emerald-200/80">Inscrição #${userSub.id}. Compareça no dia e horário informados para validação da carga horária acadêmica.</p>
+                    </div>
+                `;
+            } else if (isPast) {
+                statusBox.className = 'p-4 rounded-2xl border text-xs bg-slate-950 border-slate-800 text-slate-400';
+                statusBox.innerHTML = `<p>⚪ Este evento acadêmico já foi realizado. Inscrições finalizadas.</p>`;
+            } else if (isFull) {
+                statusBox.className = 'p-4 rounded-2xl border text-xs bg-rose-500/10 border-rose-500/30 text-rose-300';
+                statusBox.innerHTML = `<p class="font-bold">🔴 Capacidade Máxima Atingida: Todas as vagas deste evento foram preenchidas.</p>`;
+            } else {
+                statusBox.className = 'p-4 rounded-2xl border text-xs bg-indigo-500/10 border-indigo-500/30 text-indigo-300';
+                statusBox.innerHTML = `<p>🟢 Vagas Abertas: Inscreva-se agora para garantir sua participação e certificado oficial.</p>`;
+            }
+
+            // Ações do Rodapé do Modal
+            const actionsEl = document.getElementById('details-actions');
+            let actionsHtml = '';
+
+            // Se o usuário participou / tem inscrição:
+            if (userSub) {
+                actionsHtml += `
+                    <button onclick="closeEventDetailsModal(); viewCertificate(${userSub.id})" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-amber-600/20 transition">
+                        <span>🎓</span> Visualizar Meu Certificado / Diploma
+                    </button>
+                `;
+                if (!isPast) {
+                    actionsHtml += `
+                        <button onclick="closeEventDetailsModal(); cancelSubscription(${userSub.id})" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-semibold transition">
+                            Cancelar Minha Inscrição
+                        </button>
+                    `;
+                }
+            } else if (!isPast && !isFull) {
+                actionsHtml += `
+                    <button onclick="closeEventDetailsModal(); subscribeToEvent(${e.id})" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition">
+                        <span>✍️</span> Inscrever-se Neste Evento
+                    </button>
+                `;
+            }
+
+            // Controles de Gestão Editorial para ADMIN e EDITOR
+            if (['ADMIN', 'EDITOR'].includes(currentUser?.role)) {
+                actionsHtml += `
+                    <button onclick="closeEventDetailsModal(); openEditEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
+                        <span>✏️</span> Editar
+                    </button>
+                `;
+            }
+            if (currentUser?.role === 'ADMIN') {
+                actionsHtml += `
+                    <button onclick="closeEventDetailsModal(); deleteEvent(${e.id})" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-medium border border-rose-500/30 transition flex items-center gap-1.5">
+                        <span>🗑️</span> Excluir
+                    </button>
+                `;
+            }
+
+            actionsHtml += `
+                <button onclick="closeEventDetailsModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition ml-auto">
+                    Fechar
+                </button>
+            `;
+
+            actionsEl.innerHTML = actionsHtml;
+            document.getElementById('event-details-modal').classList.remove('hidden');
+        }
+
+        function closeEventDetailsModal() {
+            document.getElementById('event-details-modal').classList.add('hidden');
         }
 
         // RENDERIZAÇÃO DO CALENDÁRIO EDITORIAL INTERATIVO
@@ -938,8 +1198,8 @@
                 const cellDate = new Date(year, month, i);
                 const isCellPast = cellDate < new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                // Filtra os eventos agendados para este dia
-                const dayEvents = allLoadedEvents.filter(e => {
+                // Filtra os eventos agendados para este dia (respeitando o filtro RBAC visibleEvents)
+                const dayEvents = visibleEvents.filter(e => {
                     const eDate = new Date(e.event_date);
                     return eDate.getFullYear() === year && eDate.getMonth() === month && eDate.getDate() === i;
                 });
@@ -948,7 +1208,7 @@
                     const eDt = new Date(e.event_date);
                     const ePast = eDt < now;
                     const timeStr = eDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    const badgeBg = ePast ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-indigo-600/20 text-indigo-300 border-indigo-500/30';
+                    const badgeBg = ePast ? 'bg-amber-500/10 text-amber-300 border-amber-500/30' : 'bg-indigo-600/20 text-indigo-300 border-indigo-500/30';
 
                     return `
                         <div onclick="openEventDetailsModal(${e.id})" class="p-1.5 rounded-lg border text-[10px] cursor-pointer hover:scale-[1.02] transition truncate font-medium ${badgeBg}" title="${escapeHtml(e.title)} (${timeStr})">
@@ -979,16 +1239,6 @@
         function goToCurrentMonth() {
             calendarDate = new Date();
             renderCalendar();
-        }
-
-        function openEventDetailsModal(eventId) {
-            const ev = allLoadedEvents.find(e => e.id === eventId);
-            if (!ev) return;
-            if (['ADMIN', 'EDITOR'].includes(currentUser?.role)) {
-                openEditEventModal(ev);
-            } else {
-                subscribeToEvent(ev.id);
-            }
         }
 
         // INSCRIÇÃO NO EVENTO
