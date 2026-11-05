@@ -157,6 +157,60 @@ exports.list = async (req, res) => {
 };
 
 /**
+ * Endpoint de inicialização de dados de demonstração (Seed Rápido)
+ * Garante contas de ADMIN, EDITOR e USER para testes visuais e eventos de exemplo
+ */
+exports.setupDemoAccounts = async (req, res) => {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const adminPass = await bcrypt.hash('Admin@123456', salt);
+        const editorPass = await bcrypt.hash('EditorPassword123', salt);
+        const userPass = await bcrypt.hash('UserPassword123', salt);
+
+        // 1. Garante o ADMIN oficial com papel ADMIN
+        await db.query(`
+            INSERT INTO users (name, email, password, role)
+            VALUES ('Administrador Geral', 'admin@eventos.edu.br', $1, 'ADMIN')
+            ON CONFLICT (email) DO UPDATE SET role = 'ADMIN', password = $1, name = 'Administrador Geral'
+        `, [adminPass]);
+
+        // 2. Garante o EDITOR oficial com papel EDITOR
+        await db.query(`
+            INSERT INTO users (name, email, password, role)
+            VALUES ('Coordenador de Eventos', 'editor@eventos.edu.br', $1, 'EDITOR')
+            ON CONFLICT (email) DO UPDATE SET role = 'EDITOR', password = $1, name = 'Coordenador de Eventos'
+        `, [editorPass]);
+
+        // 3. Garante o USER oficial com papel USER
+        await db.query(`
+            INSERT INTO users (name, email, password, role)
+            VALUES ('Carlos Aluno', 'aluno@eventos.edu.br', $1, 'USER')
+            ON CONFLICT (email) DO UPDATE SET password = $1, name = 'Carlos Aluno'
+        `, [userPass]);
+
+        // 4. Insere 3 eventos acadêmicos se a tabela de eventos estiver vazia
+        const eventsCount = await db.query('SELECT COUNT(*) FROM events');
+        if (parseInt(eventsCount.rows[0].count) === 0) {
+            const adminRes = await db.query("SELECT id FROM users WHERE email = 'admin@eventos.edu.br'");
+            const adminId = adminRes.rows[0]?.id || null;
+
+            await db.query(`
+                INSERT INTO events (title, description, event_date, location, capacity, created_by)
+                VALUES 
+                ('Simpósio de Inteligência Artificial e Engenharia de Software 2026', 'Palestrantes abordando agentes autônomos, LLMs, Clean Architecture e DevSecOps.', CURRENT_TIMESTAMP + INTERVAL '15 days', 'Auditório Nobre Central', 100, $1),
+                ('Workshop de Microsserviços e Segurança RBAC com Node.js', 'Construção prática de APIs REST com autenticação JWT, controle de acesso e Docker.', CURRENT_TIMESTAMP + INTERVAL '7 days', 'Laboratório de Informática 3', 2, $1),
+                ('Seminário Nacional de Cibersegurança e Proteção de Dados', 'Boas práticas OWASP, Zero-Trust e proteção contra vazamento de credenciais.', CURRENT_TIMESTAMP + INTERVAL '30 days', 'Transmissão Online / YouTube Live', 50, $1)
+            `, [adminId]);
+        }
+
+        res.json({ message: 'Ambiente de demonstração e eventos de teste preparados com sucesso!' });
+    } catch (err) {
+        console.error('[setupDemoAccounts] Erro:', err);
+        res.status(500).json({ error: 'Erro ao configurar ambiente de demonstração.' });
+    }
+};
+
+/**
  * Consulta de usuário por ID
  * Matriz RBAC: ADMIN ✓ | EDITOR ✓ | USER ✓ (Apenas o próprio perfil) | PÚBLICO ✖
  */

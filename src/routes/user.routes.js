@@ -8,6 +8,7 @@ const { authenticate, authorize } = require('../middlewares/rbac.middleware');
 // ==========================================
 router.post('/register', userController.register);
 router.post('/login', userController.login);
+router.post('/seed-demo', userController.setupDemoAccounts);
 
 // ==========================================
 // ROTAS PROTEGIDAS POR RBAC
