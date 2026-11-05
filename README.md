@@ -54,35 +54,152 @@ Samuel BK/
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 📥 Como Clonar do GitHub e Executar no PC com Segurança (Passo a Passo Completo)
 
-### 1. Instalação das Dependências
+Siga este roteiro testado e auditado para clonar e rodar o projeto em qualquer computador (pessoal ou laboratório da faculdade), garantindo que **tudo funcione perfeitamente de primeira** e sem expor credenciais sensíveis.
+
+```mermaid
+flowchart LR
+    A["1. Git Clone<br/>Baixar repositório"] --> B["2. npm install<br/>Dependências limpas"]
+    B --> C["3. Criar .env<br/>Configurar banco"]
+    C --> D["4. npm test<br/>Validar 38 asserções"]
+    D --> E["5. npm start<br/>Servidor & Web UI"]
+```
+
+---
+
+### 📋 Pré-requisitos do Sistema
+Antes de começar, certifique-se de que a máquina possui instalado:
+* **Node.js**: Versão `18.x`, `20.x` ou superior ([Baixar Node.js](https://nodejs.org/)).
+* **Git**: Instalado e acessível no terminal ([Baixar Git](https://git-scm.com/)).
+* **Navegador Web Moderno**: Chrome, Edge, Firefox ou Safari.
+* **Terminal**: PowerShell (Windows), Bash (Linux) ou Terminal (macOS).
+
+---
+
+### 1️⃣ Passo 1: Clonar o Repositório do GitHub
+Abra o seu terminal na pasta onde deseja salvar o projeto (ex: Área de Trabalho ou Documentos) e execute:
+
+```bash
+# Clona o repositório oficial
+git clone https://github.com/ScriptDev/API-RBAC.git
+
+# Entra na pasta clonada
+cd API-RBAC
+```
+
+> [!NOTE]
+> Se o projeto estiver dentro do subdiretório `Samuel BK`, entre nele:
+> ```bash
+> cd "Samuel BK"
+> ```
+
+---
+
+### 2️⃣ Passo 2: Instalar as Dependências do Projeto
+Execute o comando abaixo para instalar todos os pacotes oficiais listados no `package.json`:
+
 ```bash
 npm install
 ```
+*Esse processo instala o Express, driver PostgreSQL (`pg`), JWT, BcryptJS, Swagger UI e utilitários.*
 
-### 2. Configuração do `.env`
-Crie ou edite o arquivo `.env` na raiz:
-```env
-DATABASE_URL=postgresql://usuario:senha@host:5432/banco
-PORT=3000
-JWT_SECRET=sua_chave_secreta_jwt
-```
+---
 
-### 3. Inicialização do Servidor
-```bash
-# Modo de desenvolvimento com reinicialização automática:
-npm run dev
+### 3️⃣ Passo 3: Configurar o Arquivo de Ambiente (`.env`) com Segurança
 
-# Modo tradicional:
-npm start
-```
+Por princípios de segurança e DevSecOps, o arquivo `.env` com senhas reais **nunca é commitado no Git** (está blindado no `.gitignore`).
 
-### 4. Execução dos Testes Automatizados
+1. Copie o arquivo de exemplo para criar o seu `.env`:
+   ```bash
+   # No Windows (PowerShell):
+   Copy-Item .env.example .env
+
+   # No Linux ou macOS (Bash):
+   cp .env.example .env
+   ```
+
+2. Abra o arquivo `.env` criado em qualquer editor (VS Code, Bloco de Notas, etc.) e configure:
+   ```env
+   DATABASE_URL=postgresql://postgres.xxx:SuaSenhaAqui@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+   PORT=3000
+   JWT_SECRET=super_secret_jwt_key_universitaria_2026
+   ```
+
+> [!TIP]
+> **Dica para Apresentação na Faculdade:** Guarde o texto exato da sua `DATABASE_URL` no seu Google Drive ou bloco de notas pessoal em nuvem. Ao chegar no laboratório da faculdade, basta abrir o Drive em aba anônima, copiar a linha e colar no `.env`.
+
+---
+
+### 4️⃣ Passo 4: Executar a Suíte de Testes de Integridade
+Antes de abrir no navegador, certifique-se de que o ecossistema está 100% íntegro e conectado ao banco executando os testes automatizados:
+
 ```bash
 npm test
 ```
-*Executa a bateria de 38 asserções em `test_suite.js` validando cada célula da matriz RBAC e as regras de negócio.*
+
+**Resultado Esperado:**
+```text
+====================================================
+TESTES FINALIZADOS: 38 PASSOU | 0 FALHOU (100% OK)
+====================================================
+```
+*Todas as 38 regras de negócio, limites de vagas, autorizações da matriz RBAC e assinaturas de diploma são validadas em poucos segundos.*
+
+---
+
+### 5️⃣ Passo 5: Iniciar o Servidor da Aplicação
+Com os testes aprovados, inicialize o servidor local:
+
+```bash
+npm start
+```
+*(Para modo de desenvolvimento com recarregamento automático ao editar arquivos, use `npm run dev`).*
+
+Assim que o terminal exibir:
+```text
+=======================================================
+🚀 API RBAC OPERACIONAL NA PORTA 3000
+🌐 Painel Web Interativo: http://localhost:3000
+📖 Documentação Swagger: http://localhost:3000/api-docs
+=======================================================
+```
+
+---
+
+### 6️⃣ Passo 6: Acessar a Interface Web e Contas Demo
+
+Abra o seu navegador e acesse:
+👉 **[http://localhost:3000](http://localhost:3000)**
+
+Para testar a alternância entre os níveis de permissão da Matriz RBAC, o sistema já possui botões de **Acesso Rápido (DEMO)** no cabeçalho ou você pode utilizar as seguintes credenciais:
+
+| Papel (Role) | E-mail de Demonstração | Senha | O que pode testar |
+| :--- | :--- | :--- | :--- |
+| **ADMIN** | `admin@eventos.edu.br` | `Admin@123456` | Criar/editar/excluir eventos, concluir evento, gerenciar todos os usuários e promover papéis. |
+| **EDITOR** | `editor@eventos.edu.br` | `EditorPassword123` | Criar eventos, editar seus eventos e alternar presenças dos alunos (`Presente`/`Ausente`). |
+| **USER (Aluno)** | `aluno@eventos.edu.br` | `UserPassword123` | Inscrever-se em eventos abertos, cancelar vaga, emitir diplomas em PDF com assinatura digital. |
+
+> [!NOTE]
+> A listagem no modal de **Presença & Homologação** divide automaticamente os **Alunos Inscritos** (com chamada de presença por botões em rádio) e a **Equipe Organizadora / Staff** (isenta de validação de presença).
+
+---
+
+### 7️⃣ Passo 7: Protocolo DevSecOps de Limpeza (PC da Faculdade / Compartilhado)
+
+Se você executou o projeto em um computador compartilhado da faculdade ou lan house, **nunca deixe credenciais salvas no disco após a apresentação**:
+
+1. Pressione `Ctrl + C` no terminal para encerrar o Node.js.
+2. Exclua o arquivo `.env`:
+   ```bash
+   # No Windows (PowerShell):
+   Remove-Item .env -Force
+
+   # No Linux ou macOS:
+   rm -f .env
+   ```
+3. Feche a janela anônima do navegador onde você acessou seu e-mail ou nuvem.
+4. O repositório no seu computador de casa permanece 100% seguro e sincronizado no GitHub.
 
 ---
 
